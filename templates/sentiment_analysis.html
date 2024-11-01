@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stock Sentiment Analysis</title>
+    <link rel="stylesheet" href="/static/css/stylesentiment.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-container">
+        <img
+          src="/static/images/stck.gif"
+          alt="Loading..."
+          class="loading-gif"
+        />
+        <p class="loading-text">Analyzing sentiment...</p>
+      </div>
+    </div>
+    <style>
+      /* Loading Animation Styles */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        min-width: 200px;
+      }
+
+      .loading-gif {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 20px;
+        border-radius: 12px; /* Added border-radius to match container */
+        object-fit: cover; /* Ensures the GIF maintains its aspect ratio */
+      }
+
+      .loading-text {
+        color: #333;
+        font-size: 20px;
+        margin: 0;
+        font-weight: 500;
+      }
+
+      /* Add this class to body when loading */
+      .body-blur {
+        overflow: hidden;
+      }
+    </style>
+    <script>
+      // Function to show loading overlay
+      function showLoading() {
+        const overlay = document.getElementById("loadingOverlay");
+        const body = document.body;
+
+        overlay.style.display = "flex";
+        body.classList.add("body-blur");
+      }
+
+      // Function to hide loading overlay
+      function hideLoading() {
+        const overlay = document.getElementById("loadingOverlay");
+        const body = document.body;
+
+        overlay.style.display = "none";
+        body.classList.remove("body-blur");
+      }
+
+      // Add this to your form submit event
+      document
+        .querySelector(".sentiment-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // Prevent default form submission
+          showLoading(); // Show loading overlay
+
+          // Submit the form
+          this.submit();
+        });
+    </script>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="container">
+        <h1 class="brand">Investment Platform</h1>
+        <ul class="nav-links">
+          <li><a href="/">Dashboard</a></li>
+          <li><a href="/profile">Profile</a></li>
+          <li><a href="/logout">Log Out</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Sentiment Analysis Section -->
+    <section class="sentiment-analysis">
+      <div class="container">
+        <h2>Stock Sentiment Analysis</h2>
+        <p>
+          Choose the tickers you want to analyze and get insights into their
+          market sentiment based on recent news.
+        </p>
+
+        <!-- Form to select tickers -->
+        <form method="POST" action="/sentiment" class="sentiment-form">
+          <label for="tickers">Choose tickers:</label>
+          <select name="tickers" id="tickers" multiple>
+            <option value="AMZN">AMZN</option>
+            <option value="AMD">AMD</option>
+            <option value="FB">FB</option>
+            <option value="GOOGL">GOOGL</option>
+            <option value="AAPL">AAPL</option>
+            <option value="TSLA">TSLA</option>
+          </select>
+          <button type="submit" class="btn analyze-btn">
+            Analyze Sentiment
+          </button>
+        </form>
+
+        <!-- Displaying Sentiment Data -->
+        {% if table %}
+        <h3>Sentiment Data</h3>
+        <div class="table-container">
+          <div class="table-responsive">{{ table | safe }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Displaying the Sentiment Chart -->
+        {% if plot_url %}
+        <h3>Sentiment Analysis Chart</h3>
+        <div class="chart-container">
+          <img
+            src="data:image/png;base64,{{ plot_url }}"
+            alt="Sentiment Analysis Chart"
+            class="chart-img"
+          />
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 Investment Platform. All rights reserved.</p>
+      </div>
+    </footer>
+    {% if hide_loading %}
+    <script>
+      hideLoading();
+    </script>
+    {% endif %}
+    <script>
+      // Remove any existing event listeners
+      const form = document.querySelector(".sentiment-form");
+      if (form) {
+        form.removeEventListener("submit", function () {});
+
+        form.addEventListener("submit", function (e) {
+          const selectedTickers =
+            document.getElementById("tickers").selectedOptions;
+
+          if (selectedTickers.length === 0) {
+            e.preventDefault();
+            alert("Please select at least one ticker to analyze.");
+            return;
+          }
+
+          // Show loading overlay before form submission
+          const overlay = document.getElementById("loadingOverlay");
+          const body = document.body;
+
+          overlay.style.display = "flex";
+          body.classList.add("body-blur");
+        });
+      }
+    </script>
+  </body>
+</html>

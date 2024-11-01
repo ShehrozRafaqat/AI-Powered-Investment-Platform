@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Portfolio analysis and optimization with predictive insights."
+    />
+    <meta name="author" content="Investment Platform" />
+    <title>Portfolio Analysis</title>
+
+    <!-- Bootstrap for styling -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/styleportfolio.css" />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">Investment Platform</a>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/portfolio_analysis"
+              >Portfolio Analysis</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+      <h2 class="text-center">Portfolio Analysis</h2>
+      <p class="text-center">
+        Optimize and analyze your portfolio with advanced metrics and
+        visualizations.
+      </p>
+
+      <!-- Portfolio Analysis Form -->
+      <div class="row">
+        <div class="col-md-6 offset-md-3">
+          <form id="portfolioForm">
+            <div class="mb-3">
+              <label for="tickers" class="form-label">Select Tickers</label>
+              <input
+                type="text"
+                class="form-control"
+                id="tickers"
+                placeholder="Enter tickers, e.g., AAPL, MSFT"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="weights" class="form-label">Enter Weights</label>
+              <input
+                type="text"
+                class="form-control"
+                id="weights"
+                placeholder="Enter weights, e.g., 0.4, 0.4, 0.2"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="currency" class="form-label">Currency</label>
+              <select id="currency" class="form-select">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="rebalancing_period" class="form-label"
+                >Rebalancing Period</label
+              >
+              <select id="rebalancing_period" class="form-select">
+                <option value="year">Year</option>
+                <option value="quarter">Quarter</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+              Analyze Portfolio
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div id="results" class="mt-5" style="display: none">
+        <h4>Portfolio Metrics</h4>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Expected Return</h5>
+                <p class="card-text" id="expected_return">Loading...</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Risk</h5>
+                <p class="card-text" id="risk">Loading...</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Sharpe Ratio</h5>
+                <p class="card-text" id="sharpe_ratio">Loading...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="mt-4">Efficient Frontier</h4>
+        <img
+          id="efficient_frontier"
+          src=""
+          alt="Efficient Frontier"
+          class="img-fluid"
+        />
+
+        <h4 class="mt-4">Portfolio Visualization</h4>
+        <div id="portfolio_visualization">
+          <!-- Visualization goes here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+      <div class="container text-center">
+        <p>&copy; 2025 Investment Platform. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#portfolioForm").submit(function (event) {
+          event.preventDefault();
+
+          var tickers = $("#tickers").val().split(",");
+          var weights = $("#weights").val().split(",").map(Number);
+          var currency = $("#currency").val();
+          var rebalancing_period = $("#rebalancing_period").val();
+
+          $.ajax({
+            url: "/portfolio_analysis",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+              tickers: tickers,
+              weights: weights,
+              currency: currency,
+              rebalancing_period: rebalancing_period,
+            }),
+            success: function (response) {
+              $("#results").show();
+              $("#expected_return").text(
+                response.metrics.expected_return + "%"
+              );
+              $("#risk").text(response.metrics.risk + "%");
+              $("#sharpe_ratio").text(response.metrics.sharpe_ratio);
+              $("#efficient_frontier").attr(
+                "src",
+                "data:image/png;base64," + response.efficient_frontier.image
+              );
+            },
+            error: function (error) {
+              alert("Error fetching data");
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

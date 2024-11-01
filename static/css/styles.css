@@ -1,0 +1,204 @@
+/* General Reset */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  color: #333;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+/* Navbar */
+.navbar {
+  background: #182e6f;
+  color: #fff;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between; /* Space between brand and nav links */
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto; /* Center the container */
+  padding: 0 20px; /* Add space on the left and right */
+}
+
+.navbar .brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  flex: 1; /* Allows centering */
+}
+
+.navbar .nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar .nav-links a {
+  text-decoration: none;
+  color: #fff;
+  transition: color 0.3s ease;
+  padding-right: 20px; /* Add padding between login and end of screen */
+}
+
+.navbar .nav-links a:hover {
+  color: #ffcc00;
+}
+
+/* Hero Section */
+.hero {
+  background: url("/static/images/stck.gif") no-repeat center center/cover;
+  color: #fff;
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.hero h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero .btn {
+  background: #ffcc00;
+  color: #333;
+  padding: 0.8rem 1.5rem;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.hero .btn:hover {
+  background: #e6b800;
+}
+
+/* Features Section */
+.features {
+  background: #f4f4f4;
+  padding: 2rem 0;
+}
+
+.features .container {
+  text-align: center;
+}
+
+.features h2 {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.features .feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.features .feature {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.features .feature i {
+  font-size: 2rem;
+  color: #004080;
+  margin-bottom: 1rem;
+}
+
+.features .feature h3 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+/* Footer */
+.footer {
+  background: #182e6f;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+}
+.signup-section {
+  background: #ffffff;
+  padding: 50px 0;
+}
+
+.signup-box {
+  background: #ffffff;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.signup-box h2 {
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: #2c3e50;
+}
+
+.input-group {
+  margin-bottom: 20px;
+  margin-right: 20px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.input-group input:focus {
+  border-color: #3498db;
+  background-color: #fff;
+}
+
+.btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #2980b9;
+}
+
+/* Login Link */
+.login-link {
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.login-link a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}

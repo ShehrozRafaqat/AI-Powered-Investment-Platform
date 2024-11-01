@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -256,6 +256,7 @@ def main():
                 st.subheader("Predicted Prices for the Next 7 Days")
                 for date, price in zip(future_dates, next_7_days):
                     st.write(f"{date.strftime('%Y-%m-%d')}: ${price:.2f}")
+                
 
 if __name__ == '__main__':
     main()

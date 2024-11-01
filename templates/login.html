@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Investment Platform</title>
+    <link rel="stylesheet" href="/static/css/stylelogin.css" />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="container">
+        <h1 class="brand">Investment Platform</h1>
+        <ul class="nav-links">
+          <li><a href="/signup">Sign Up</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Login Section -->
+    <section class="login-section">
+      <div class="container">
+        <h2>Log In</h2>
+        <form method="POST" action="/login">
+          <div class="input-group">
+            <input type="email" name="email" placeholder="Email" required />
+          </div>
+          <div class="input-group">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+            />
+          </div>
+          <button type="submit" class="btn">Log In</button>
+        </form>
+        <p class="signup-redirect">
+          Don't have an account? <a href="/signup">Sign up here.</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 Investment Platform. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>

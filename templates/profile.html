@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Investment Profile - Investment Platform</title>
+    <link rel="stylesheet" href="/static/css/styleprofile.css" />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="container">
+        <h1 class="brand">Investment Platform</h1>
+        <ul class="nav-links">
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/logout">Log Out</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Profile Content -->
+    <section class="profile">
+      <div class="container">
+        <h2>Investment Profile</h2>
+        <p>Update your investment preferences and goals below.</p>
+
+        <form method="POST" action="/profile" class="profile-form">
+          <!-- Risk Tolerance -->
+          <label for="risk_tolerance">Risk Tolerance</label>
+          <select name="risk_tolerance" id="risk_tolerance" required>
+            <option value="low" {% if profile and profile['risk_tolerance'] == 'low' %}selected{% endif %}>Low</option>
+            <option value="medium" {% if profile and profile['risk_tolerance'] == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="high" {% if profile and profile['risk_tolerance'] == 'high' %}selected{% endif %}>High</option>
+          </select>
+
+          <!-- Preferred Sectors -->
+          <label for="preferred_sectors">Preferred Sectors</label>
+          <input type="text" name="preferred_sectors" id="preferred_sectors" value="{{ profile['preferred_sectors'] if profile else '' }}" required />
+
+          <!-- Investment Goals -->
+          <label for="investment_goals">Investment Goals</label>
+          <textarea name="investment_goals" id="investment_goals" required>{{ profile['investment_goals'] if profile else '' }}</textarea>
+
+          <button type="submit" class="btn">Save Profile</button>
+        </form>
+
+        <a href="/" class="btn back-btn">Back to Dashboard</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 Investment Platform. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>

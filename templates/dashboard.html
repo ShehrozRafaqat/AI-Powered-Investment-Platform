@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Investment Platform</title>
+    <link rel="stylesheet" href="/static/css/styledashboard.css" />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="container">
+        <h1 class="brand">Investment Platform</h1>
+        <ul class="nav-links">
+          <li><a href="/sentiment">Analyze Stock sentiment</a></li>
+          <li><a href="/stock-prediction">Predict Stock Prices</a></li>
+          <li><a href="/portfolio_analysis">Analyze Portfolio</a></li>
+          <li><a href="/profile">Update Profile</a></li>
+          <li><a href="/logout">Log Out</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <section class="dashboard">
+      <div class="container">
+        <h2>Welcome {{ username }}</h2>
+        <p>
+          We're glad to have you on board! Here's a summary of your investment
+          activities:
+        </p>
+
+        <!-- Investment Overview Section -->
+        <div class="investment-overview">
+          <h3>Investment Overview</h3>
+          <div class="overview-box">
+            <p><strong>Total Portfolio Value:</strong> $10,000</p>
+            <p><strong>Stocks in Portfolio:</strong> 5</p>
+            <p><strong>Latest Predictions:</strong> +3.5% in the last month</p>
+          </div>
+        </div>
+
+        <!-- Investment Recommendations Section -->
+        <div class="recommendations">
+          <h3>Your Personalized Investment Recommendations</h3>
+          <div class="recommendation-box">
+            <p>
+              <strong>Recommendation 1:</strong> Buy 100 shares of Company XYZ
+            </p>
+            <p>
+              <strong>Recommendation 2:</strong> Hold your investment in ABC
+              Corp
+            </p>
+            <p>
+              <strong>Recommendation 3:</strong> Diversify into the healthcare
+              sector
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 Investment Platform. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+body {
+  font-family: "Arial", sans-serif;
+}
+
+.navbar {
+  margin-bottom: 20px;
+}
+
+.container {
+  max-width: 1200px;
+}
+
+#portfolioForm input,
+#portfolioForm select,
+#portfolioForm button {
+  margin-bottom: 15px;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-weight: bold;
+}
+
+#results {
+  display: none;
+}
+
+#portfolio_visualization {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 18px;
+}

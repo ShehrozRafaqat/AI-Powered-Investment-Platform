@@ -1,0 +1,130 @@
+/* Styles for Dashboard Page */
+body {
+  font-family: "Calibri", sans-serif;
+  margin: 0;
+}
+
+.dashboard {
+  padding: 50px 0;
+  background-color: #f9f9f9;
+}
+
+.dashboard .container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h2 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Investment Overview Section */
+.investment-overview {
+  margin-top: 30px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.investment-overview h3 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.overview-box {
+  padding: 20px;
+  background-color: #f4f4f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.overview-box p {
+  font-size: 16px;
+  color: #333;
+  margin: 10px 0;
+}
+
+/* Investment Recommendations Section */
+.recommendations {
+  margin-top: 50px;
+}
+
+.recommendations h3 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.recommendation-box {
+  padding: 20px;
+  background-color: #f4f4f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-box p {
+  font-size: 16px;
+  color: #333;
+  margin: 10px 0;
+}
+
+/* Footer */
+.footer {
+  background: #182e6f;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* Navigation Bar */
+.navbar {
+  background: #182e6f;
+  color: #fff;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between; /* Space between brand and nav links */
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto; /* Center the container */
+  padding: 0 20px;
+}
+
+.navbar .brand {
+  color: white;
+  font-size: 24px;
+}
+
+.navbar .nav-links {
+  list-style: none;
+}
+
+.navbar .nav-links li {
+  display: inline;
+  margin-left: 20px;
+}
+
+.navbar .nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.navbar .nav-links a:hover {
+  text-decoration: underline;
+}
