@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from flask_bcrypt import Bcrypt
 import sqlite3
 import pandas as pd
@@ -14,7 +14,10 @@ import json
 import seaborn as sns
 import numpy as np
 import okama as ok
-
+import plotly
+import plotly.graph_objs as go
+import types
+from itertools import chain
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -72,6 +75,8 @@ def login():
         if user and bcrypt.check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['username']
+            print(f"Email: {email}, Password: {password}")
+            print(f"User fetched from DB: {user}")
             flash('Logged in successfully!', 'success')
             return redirect('/')
         else:
@@ -445,39 +450,141 @@ def portfolio_page():
 
 @app.route('/portfolio_analysis', methods=['POST'])
 def portfolio_analysis():
+    print("Portfolio Analysis")
     try:
-        # Get portfolio data from frontend
+        # Parse and validate input data
         data = request.json
-        tickers = data['tickers']  # e.g., ['AAPL.US', 'MSFT.US', 'TSLA.US']
-        weights = data['weights']  # e.g., [0.4, 0.4, 0.2]
-        currency = data.get('currency', 'USD')  # Default to USD
-        rebalancing_period = data.get('rebalancing_period', 'month')  # Optional, default to 'month'
+        print(f"Received data: {data}")
         
-        # Validate rebalancing_period
-        allowed_periods = ['none', 'year', 'half-year', 'quarter', 'month']
-        if rebalancing_period not in allowed_periods:
-            raise ValueError(f"Invalid rebalancing period. Must be one of {allowed_periods}")
+        tickers = data['tickers']
+        weights = data['weights']
+        if isinstance(weights[0], list):
+            weights = list(chain.from_iterable(weights))
+        weights = [float(w) for w in weights]
+        currency = data.get('currency', 'USD')
+        rebalancing_period = data.get('rebalancing_period', 'month')
+
+        # Create portfolio
+        portfolio = ok.Portfolio(
+            assets=tickers,
+            weights=weights,
+            ccy=currency,
+            rebalancing_period=rebalancing_period
+        )
+        asset_list = ok.AssetList(tickers, ccy=currency)
+
+        # Get wealth indexes data for individual assets
+        wealth_indexes = asset_list.wealth_indexes
         
-        # Create Portfolio instance
-        portfolio = ok.Portfolio(assets=tickers, weights=weights, ccy=currency, rebalancing_period=rebalancing_period)
-        
-        # Get portfolio metrics
-        metrics = {
-            'expected_return': portfolio.expected_return.mean() * 100,  # As percentage
-            'risk': portfolio.risk.mean() * 100,  # As percentage
-            'sharpe_ratio': portfolio.sharpe_ratio.mean(),
-            'diversification_ratio': portfolio.diversification_ratio.mean(),
-            'historical_cagr': portfolio.cagr.mean() * 100,  # Compounded Annual Growth Rate
+        # Prepare wealth indexes data for Plotly
+        wealth_plot_data = {
+            'dates': wealth_indexes.index.strftime('%Y-%m-%d').tolist(),
+            'series': {}
         }
         
-        # Generate Efficient Frontier (if available)
-        efficient_frontier = portfolio.efficient_frontier  # Efficient frontier data
+        # Add data for each asset
+        for column in wealth_indexes.columns:
+            wealth_plot_data['series'][column] = [
+                float(val) for val in wealth_indexes[column].values
+            ]
         
-        return jsonify({'metrics': metrics, 'efficient_frontier': efficient_frontier.to_dict()})
-    
+        # Add portfolio wealth index
+        portfolio_wealth = portfolio.wealth_index
+        wealth_plot_data['series']['Portfolio'] = [
+            float(val) for val in portfolio_wealth.values.flatten()
+        ]
+
+        # Calculate metrics with proper series handling
+        # For risk_annual, get the last value from the series
+        try:
+            annual_risk = portfolio.risk_annual.iloc[-1]  # Get the last value from the series
+        except Exception as e:
+            print(f"Error getting risk_annual: {str(e)}")
+            annual_risk = 0.0
+
+        # Get CAGR and Sharpe ratio with error handling
+        try:
+            cagr = portfolio.get_cagr()
+            if isinstance(cagr, (pd.Series, pd.DataFrame)):
+                cagr = cagr.iloc[-1]
+        except Exception as e:
+            print(f"Error getting CAGR: {str(e)}")
+            cagr = 0.0
+
+        try:
+            sharpe_ratio = portfolio.get_sharpe_ratio()
+            if isinstance(sharpe_ratio, (pd.Series, pd.DataFrame)):
+                sharpe_ratio = sharpe_ratio.iloc[-1]
+        except Exception as e:
+            print(f"Error getting Sharpe ratio: {str(e)}")
+            sharpe_ratio = 0.0
+
+        # Get diversification ratio with error handling
+        try:
+            div_ratio = float(portfolio.diversification_ratio)
+        except Exception as e:
+            print(f"Error getting diversification ratio: {str(e)}")
+            div_ratio = 0.0
+
+        # Prepare metrics dictionary with proper rounding
+        metrics = {
+            'annual_risk': np.round(float(annual_risk) * 100, 2),
+            'sharpe_ratio': np.round(float(sharpe_ratio), 2),
+            'cagr': np.round(float(cagr) * 100, 2),
+            'diversification_ratio': np.round(float(div_ratio), 2)
+        }
+
+        # Get historical data with proper error handling
+        try:
+            historical_data = portfolio.wealth_index
+            performance_data = {
+                'dates': historical_data.index.strftime('%Y-%m-%d').tolist(),
+                'values': [np.round(float(v), 2) for v in historical_data.values.flatten()]
+            }
+        except Exception as e:
+            print(f"Error processing historical data: {str(e)}")
+            performance_data = {'dates': [], 'values': []}
+
+        # Format weights data
+        weights_data = {
+            'assets': tickers,
+            'weights': [np.round(float(w) * 100, 2) for w in weights]
+        }
+
+        # Convert correlation matrix with error handling
+        try:
+            corr_matrix = portfolio.assets_ror.corr()
+            correlation = {}
+            for column in corr_matrix.columns:
+                correlation[column] = {
+                    str(index): float(value) 
+                    for index, value in corr_matrix[column].items()
+                }
+        except Exception as e:
+            print(f"Error processing correlation matrix: {str(e)}")
+            correlation = {}
+
+        # Log successful calculations
+        print("Successfully calculated portfolio metrics:")
+        print(f"Risk Annual: {annual_risk}")
+        print(f"CAGR: {cagr}")
+        print(f"Sharpe Ratio: {sharpe_ratio}")
+
+        return jsonify({
+            'metrics': metrics,
+            'performance': performance_data,
+            'weights': weights_data,
+            'correlation': correlation,
+            'wealth_plot_data': wealth_plot_data 
+        })
+
     except Exception as e:
-        print(f"Error occurred: {e}")
-        return jsonify({'error': str(e)}), 400
+        print(f"Error in portfolio analysis: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'error_type': type(e).__name__,
+            'error_location': 'main_function'
+        }), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
