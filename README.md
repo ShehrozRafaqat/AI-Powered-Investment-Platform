@@ -58,4 +58,4 @@ streamlit run sentiment_analysis_app.py
   - Support for more stock exchanges.
   - Enhanced visualization features and interactive dashboards.
 # Contributors
-Developer: Muhammad Eihaab
+Developer: Muhammad Eihaab, Shehroz Rafaqat
