@@ -1,0 +1,140 @@
+/* Styles for Profile Page */
+body {
+  font-family: "Calibri", sans-serif;
+  margin: 0;
+}
+.profile {
+  padding: 50px 0;
+  background-color: #f9f9f9;
+}
+
+.profile .container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h2 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+/* Profile Form */
+.profile-form {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.profile-form label {
+  font-size: 18px;
+  color: #333;
+  display: block;
+  margin: 15px 0 5px;
+}
+
+.profile-form select,
+.profile-form input,
+.profile-form textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.profile-form textarea {
+  height: 150px;
+  resize: vertical;
+}
+
+.profile-form button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.profile-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Back Button */
+.back-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #081334;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #7830de;
+}
+
+/* Footer */
+.footer {
+  background: #182e6f;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* Navigation Bar */
+.navbar {
+  background: #182e6f;
+  color: #fff;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.navbar .container {
+  display: flex;
+  justify-content: space-between; /* Space between brand and nav links */
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto; /* Center the container */
+  padding: 0 20px;
+}
+
+.navbar .brand {
+  color: white;
+  font-size: 24px;
+}
+
+.navbar .nav-links {
+  list-style: none;
+}
+
+.navbar .nav-links li {
+  display: inline;
+  margin-left: 20px;
+}
+
+.navbar .nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.navbar .nav-links a:hover {
+  text-decoration: underline;
+}

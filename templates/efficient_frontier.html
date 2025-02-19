@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Efficient Frontier Analysis</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      /* Custom styles */
+      .navbar {
+        background-color: #182e6f;
+        color: white;
+      }
+      .navbar-brand {
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
+      .nav-links a {
+        color: white;
+        transition: color 0.3s ease;
+      }
+      .nav-links a:hover {
+        color: #d946ef; /* Purple on hover */
+      }
+      .submit-button {
+        background-color: #081334; /* Dark blue */
+        transition: background-color 0.3s ease;
+      }
+      .submit-button:hover {
+        background-color: #7830de; /* Purple */
+      }
+      #loadingSpinner .animate-spin {
+        border-top-color: #934ef3; /* Top border is transparent */
+        border-right-color: #290b53; /* Right border is transparent */
+        border-bottom-color: #5212ac; /* Bottom border is transparent */
+        border-left-color: #7830de; /* Left border uses the desired color */
+        border-width: 3px; /* Adjust thickness if needed */
+      }
+      .graph-container {
+        width: 100%; /* Full width */
+        margin: 0 auto;
+      }
+      .footer {
+        background-color: #f3f4f6; /* Light gray background */
+        padding: 2rem;
+        border-top: 1px solid #e5e7eb;
+        margin-top: 2rem;
+      }
+      .footer p {
+        font-size: 0.9rem;
+        color: #4b5563; /* Gray text */
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="navbar py-4 px-6 flex justify-between items-center">
+      <div class="navbar-brand">Investment Platform</div>
+      <ul class="nav-links flex space-x-4">
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-8 text-center">
+        Efficient Frontier Analysis
+      </h1>
+
+      <!-- Input Form -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <form id="efficientFrontierForm" class="space-y-4">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+              Tickers (comma-separated, with .US suffix)
+            </label>
+            <input
+              type="text"
+              id="tickers"
+              class="shadow border rounded w-full py-2 px-3"
+              placeholder="AAPL.US, TSLA.US"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+              Currency
+            </label>
+            <select
+              id="currency"
+              class="shadow border rounded w-full py-2 px-3"
+            >
+              <option value="USD" selected>USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+              Risk-Free Rate (%)
+            </label>
+            <input
+              type="number"
+              id="rfReturn"
+              class="shadow border rounded w-full py-2 px-3"
+              placeholder="5"
+              value="5"
+              step="0.01"
+            />
+          </div>
+          <div class="flex items-center justify-between">
+            <button
+              type="submit"
+              id="submitButton"
+              class="submit-button text-white font-bold py-2 px-4 rounded"
+            >
+              Compute Efficient Frontier
+            </button>
+            <div id="loadingSpinner" class="hidden">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Error Message Display -->
+      <div
+        id="errorMessage"
+        class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-8"
+      >
+        <span id="errorText"></span>
+      </div>
+
+      <!-- Results Section -->
+      <div id="results" class="hidden">
+        <div class="bg-white rounded-lg shadow-md p-4">
+          <div class="graph-container">
+            <div id="efficientFrontierChart"></div>
+          </div>
+          <div class="graph-container mt-8">
+            <h3 class="text-xl font-bold mb-4">
+              Transition Map (Risk vs Weights)
+            </h3>
+            <div id="transitionMapRiskChart"></div>
+          </div>
+          <div class="graph-container mt-8">
+            <h3 class="text-xl font-bold mb-4">
+              Transition Map (CAGR vs Weights)
+            </h3>
+            <div id="transitionMapCAGRChart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="container mx-auto px-4">
+        <h2 class="text-lg font-semibold mb-2">Efficient Frontier Widget</h2>
+        <p>
+          The Efficient Frontier widget uses monthly total return historical
+          data to calculate optimized portfolio points. Optimization uses
+          annualized risk (annualized standard deviation) as a utility function.
+        </p>
+        <p>
+          The widget uses constantly rebalanced portfolios (monthly rebalanced).
+          Rebalancing is the action of bringing the portfolio that has deviated
+          away from the original asset allocation back into line. After
+          rebalancing, the portfolio assets have target weights.
+        </p>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      document
+        .getElementById("efficientFrontierForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          // Elements
+          const loadingSpinner = document.getElementById("loadingSpinner");
+          const resultsSection = document.getElementById("results");
+          const errorMessage = document.getElementById("errorMessage");
+          const submitButton = document.getElementById("submitButton");
+
+          // Reset UI state
+          loadingSpinner.classList.remove("hidden"); // Show loading spinner
+          submitButton.disabled = true; // Disable submit button
+          resultsSection.classList.add("hidden"); // Hide results section
+          errorMessage.classList.add("hidden"); // Hide error message
+
+          // Get input values
+          const tickers = document
+            .getElementById("tickers")
+            .value.split(",")
+            .map((t) => t.trim());
+          const currency = document.getElementById("currency").value;
+          const rfReturn =
+            parseFloat(document.getElementById("rfReturn").value) / 100; // Convert percentage to decimal
+
+          // Validate input
+          if (tickers.length === 0 || tickers[0] === "") {
+            showError("Please enter at least one ticker.");
+            return;
+          }
+
+          try {
+            // Fetch data from the backend
+            const response = await fetch("/efficient_frontier", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tickers, currency, rf_return: rfReturn }),
+            });
+
+            const data = await response.json();
+            if (!response.ok || data.error) {
+              throw new Error(
+                data.error || "Failed to compute the efficient frontier"
+              );
+            }
+
+            // Plot the efficient frontier using Plotly
+            const frontier = data.frontier;
+
+            // Efficient Frontier Trace
+            const efTrace = {
+              x: frontier.risks,
+              y: frontier.returns,
+              mode: "lines",
+              type: "scatter",
+              name: "Efficient Frontier",
+              line: { color: "black", dash: "dash", width: 3 },
+              hovertemplate: "Risk: %{x:.2f}<br>Return: %{y:.2f}%",
+            };
+
+            // Monte Carlo Simulation Trace
+            const mcTrace = {
+              x: frontier.mc_risks,
+              y: frontier.mc_returns,
+              mode: "markers",
+              type: "scatter",
+              name: "Monte Carlo Simulation",
+              marker: { color: "green", opacity: 0.5 },
+              hovertemplate: "Risk: %{x:.2f}<br>Return: %{y:.2f}%",
+            };
+
+            const cmlTrace = {
+              x: frontier.cml_risks,
+              y: frontier.cml_returns,
+              mode: "lines",
+              type: "scatter",
+              name: "Capital Market Line (CML)",
+              line: { color: "#7830de", width: 2 },
+              hovertemplate: "Risk: %{x:.2f}<br>Return: %{y:.2f}%",
+            };
+
+            // Individual Assets Trace
+            const assetTraces = frontier.assets.map((asset) => ({
+              x: [asset.risk],
+              y: [asset.return],
+              mode: "markers+text",
+              type: "scatter",
+              name: asset.ticker,
+              text: [asset.ticker],
+              textposition: "top center",
+              marker: { color: "orange", size: 10 },
+              hovertemplate: `${asset.ticker}<br>Risk: %{x:.2f}<br>Return: %{y:.2f}%`,
+              showlegend: false, // Hide individual stock entries from the legend
+            }));
+
+            // Combine all traces
+            const traces = [efTrace, mcTrace, cmlTrace, ...assetTraces];
+
+            // Layout configuration
+            const layout = {
+              title:
+                "Efficient Frontier with Assets and Monte Carlo Simulation",
+              xaxis: { title: "Risk (Standard Deviation)" },
+              yaxis: { title: "Expected Return (CAGR)", tickformat: ".2%" },
+              plot_bgcolor: "white",
+              paper_bgcolor: "white",
+              hovermode: "closest",
+              legend: {
+                orientation: "h",
+                yanchor: "bottom",
+                y: 1.02,
+                xanchor: "right",
+                x: 1,
+              },
+              responsive: true, // Ensure responsiveness
+            };
+
+            // Render the Plotly chart
+            Plotly.newPlot("efficientFrontierChart", traces, layout);
+
+            // Render the Plotly chart
+            Plotly.newPlot("efficientFrontierChart", traces, layout);
+
+            // Render the Transition Map for Risk
+            const transitionMapRiskTrace = Object.keys(
+              frontier.transition_map_risk
+            ).map((asset) => ({
+              x: frontier.transition_map_risk[asset].x, // Risk values
+              y: frontier.transition_map_risk[asset].y, // Weights values
+              mode: "lines",
+              type: "scatter",
+              name: asset,
+              line: { width: 2 },
+              hovertemplate: `Asset: ${asset}<br>Risk: %{x:.2f}<br>Weight: %{y:.2f}`,
+            }));
+
+            // Render the Transition Map for CAGR
+            const transitionMapCAGRTrace = Object.keys(
+              frontier.transition_map_cagr
+            ).map((asset) => ({
+              x: frontier.transition_map_cagr[asset].x, // CAGR values
+              y: frontier.transition_map_cagr[asset].y, // Weights values
+              mode: "lines",
+              type: "scatter",
+              name: asset,
+              line: { width: 2 },
+              hovertemplate: `Asset: ${asset}<br>CAGR: %{x:.2f}%<br>Weight: %{y:.2f}`,
+            }));
+
+            // Layout configuration for Transition Maps
+            const transitionMapLayout = {
+              title: "Transition Map",
+              xaxis: { title: "Risk (Standard Deviation)" },
+              yaxis: { title: "Weights", range: [0, 1] }, // Weights should range from 0 to 1
+              plot_bgcolor: "white",
+              paper_bgcolor: "white",
+              hovermode: "closest",
+            };
+
+            // Render the Transition Map for Risk
+            Plotly.newPlot(
+              "transitionMapRiskChart",
+              transitionMapRiskTrace,
+              transitionMapLayout
+            );
+
+            // Update layout for CAGR Transition Map
+            transitionMapLayout.xaxis.title = "CAGR (%)"; // Update x-axis title
+            Plotly.newPlot(
+              "transitionMapCAGRChart",
+              transitionMapCAGRTrace,
+              transitionMapLayout
+            );
+
+            // Show results section
+            resultsSection.classList.remove("hidden");
+          } catch (error) {
+            showError(
+              error.message ||
+                "An error occurred while computing the efficient frontier"
+            );
+            console.error(error);
+          } finally {
+            // Hide loading spinner and re-enable submit button
+            loadingSpinner.classList.add("hidden");
+            submitButton.disabled = false;
+          }
+        });
+
+      function showError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        const errorText = document.getElementById("errorText");
+        const loadingSpinner = document.getElementById("loadingSpinner");
+        const submitButton = document.getElementById("submitButton");
+
+        errorText.textContent = message;
+        errorMessage.classList.remove("hidden"); // Show error message
+        loadingSpinner.classList.add("hidden"); // Hide loading spinner
+        submitButton.disabled = false; // Re-enable submit button
+      }
+    </script>
+  </body>
+</html>

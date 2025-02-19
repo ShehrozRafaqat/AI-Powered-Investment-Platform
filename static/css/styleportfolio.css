@@ -1,0 +1,91 @@
+body {
+  font-family: "Calibri", sans-serif;
+  margin: 0;
+}
+
+.navbar {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.navbar .brand {
+  font-size: 24px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+}
+
+.nav-links li {
+  padding: 0;
+}
+
+.nav-links a {
+  color: #555;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #7830de;
+}
+
+#portfolioForm input,
+#portfolioForm select,
+.custom-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #081334;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-button:hover {
+  background-color: #7830de;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-weight: bold;
+}
+
+#results {
+  display: none;
+}
+
+#portfolio_visualization {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 18px;
+}

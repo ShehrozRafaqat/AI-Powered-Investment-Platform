@@ -1,0 +1,241 @@
+/* Global Container */
+body {
+  font-family: "Calibri", sans-serif;
+  margin: 0;
+}
+
+.navbar {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.navbar .brand {
+  font-size: 24px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+}
+
+.nav-links li {
+  padding: 0;
+}
+
+.nav-links a {
+  color: #555;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #7830de;
+}
+
+/* Global Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Sentiment Analysis Section */
+.sentiment-analysis {
+  background-color: #f7f7f7;
+  padding: 50px 0;
+  margin-top: 30px;
+}
+
+.sentiment-analysis h2 {
+  font-size: 36px;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sentiment-analysis h3 {
+  font-size: 24px;
+  color: #333;
+  text-align: center;
+  margin: 40px 0 20px;
+}
+
+.sentiment-analysis p {
+  font-size: 18px;
+  color: #555;
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Form Styling */
+.sentiment-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto 50px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.sentiment-form label {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.sentiment-form select {
+  font-size: 16px;
+  padding: 12px;
+  width: 100%;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+.sentiment-form select:focus {
+  outline: none;
+  border-color: #7830de;
+  box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.1);
+}
+
+.sentiment-form select option {
+  padding: 12px;
+}
+
+.sentiment-form button.analyze-btn {
+  padding: 12px 40px;
+  font-size: 18px;
+  background-color: #081334;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: auto;
+  min-width: 200px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sentiment-form button.analyze-btn:hover {
+  background-color: #7830de;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Styling */
+.table-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 30px auto;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-responsive {
+  max-height: 500px;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.table-container table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+}
+
+.table-container th,
+.table-container td {
+  padding: 12px 15px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.table-container th {
+  background-color: #3498db;
+  color: #fff;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.table-container th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.table-container th:last-child {
+  border-top-right-radius: 8px;
+}
+
+.table-container td {
+  background-color: #f9f9f9;
+}
+
+/* Chart Styling */
+.chart-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 30px auto;
+  text-align: center;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chart-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Footer Styling */
+.footer {
+  background: #182e6f;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+}

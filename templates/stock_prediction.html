@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A stock prediction platform with sentiment analysis and predictive modeling."
+    />
+    <meta name="author" content="Investment Platform" />
+    <title>Stock Prediction</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/styleprediction.css" />
+  </head>
+  <body>
+     <!-- Loading Animation -->
+    <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-container">
+        <img src="/static/images/stck.gif" alt="Loading..." class="loading-gif" />
+        <p class="loading-text">Processing prediction...</p>
+    </div>
+</div>
+
+<style>
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        min-width: 200px;
+    }
+
+    .loading-gif {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        object-fit: cover;
+    }
+
+    .loading-text {
+        color: #333;
+        font-size: 20px;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .body-blur {
+        overflow: hidden;
+    }
+</style>
+    <nav class="navbar">
+      <div class="container">
+        <h1 class="brand">Investment Platform</h1>
+        <ul class="nav-links">
+          <li><a href="/">Dashboard</a></li>
+          <li><a href="/logout">Log Out</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <section class="dashboard">
+      <div class="container">
+        <h2>Stock Prediction</h2>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <div class="prediction-form-container">
+          <form id="predictionForm" method="POST" action="{{ url_for('predict_stock') }}">
+            <div class="form-group">
+              <label for="model_type">Select Prediction Model:</label>
+              <select
+                name="model_type"
+                id="model_type"
+                class="form-control"
+                required
+              >
+                <option value="Logistic Regression">Logistic Regression</option>
+                <option value="Linear Regression">Linear Regression</option>
+                <option value="LSTM">LSTM</option>
+              </select>
+            </div>
+
+            <div id="userGuide" class="alert alert-info mt-3" style="display: none;">
+              <h4>User Guide</h4>
+              <ul>
+                <li>Predictions are for the <strong>next 7 days</strong>.</li>
+                <li>Predictions are made for selected stock tickers.</li>
+                <li>The displayed predictions are weighted combinations of:</li>
+                <ul>
+                  <li><strong>Linear Regression:</strong> Based on sentiment and stock features.</li>
+                  <li><strong>LSTM:</strong> Based on historical stock prices.</li>
+                </ul>
+              </ul>
+            </div>
+
+            <div class="form-group">
+              <label for="tickers">Select Tickers for Prediction:</label>
+              <select
+                name="tickers"
+                id="tickers"
+                multiple
+                class="form-control"
+                required
+              >
+                <option value="AMZN">AMZN</option>
+                <option value="AAPL">AAPL</option>
+                <option value="GOOGL">GOOGL</option>
+                <option value="FB">FB</option>
+                <option value="TSLA">TSLA</option>
+                <option value="AMD">AMD</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-predict">
+              Predict
+            </button>
+          </form>
+        </div>
+        {% if model_type == "Logistic Regression" %} {% if tables %} {% for
+        ticker in tickers %}
+        <div class="results-section">
+          <h3>{{ ticker }} Prediction Results</h3>
+
+          {% if plots and plots[ticker] %}
+          <div class="plots-container">
+            <div class="plot">
+              <h4>Price Movement Prediction</h4>
+              <img
+                src="data:image/png;base64,{{ plots[ticker]['prediction_plot'] }}"
+                alt="{{ ticker }} Prediction Plot"
+                class="img-fluid"
+              />
+            </div>
+            <div class="plot">
+              <h4>Classification Report</h4>
+              <img
+                src="data:image/png;base64,{{ plots[ticker]['report_plot'] }}"
+                alt="{{ ticker }} Classification Report"
+                class="img-fluid"
+              />
+            </div>
+          </div>
+          {% endif %}
+
+          <h4>Detailed Predictions</h4>
+          <div class="table-container">
+            <div class="table-responsive">{{ tables[ticker] | safe }}</div>
+          </div>
+        </div>
+        {% endfor %} {% endif %} {% endif %} {% if model_type == "LSTM" %}
+        <div class="results-section">
+          <h3>{{ ticker }} LSTM Results</h3>
+          <div class="plots-container">
+            <div class="plot">
+              <h4>Price Movement Prediction</h4>
+              <img
+                src="data:image/png;base64,{{ plot_url }}"
+                alt="LSTM Prediction Plot"
+                class="img-fluid"
+              />
+            </div>
+            <h4>Prediction Metrics</h4>
+            <div class="table-container">
+              <div class="table-responsive">{{ metrics_table | safe }}</div>
+            </div>
+          </div>
+          <h4>Next 7 Days Prediction</h4>
+          <div class="table-container">
+            <div class="table-responsive">{{ next_7_days_table | safe }}</div>
+          </div>
+        </div>
+        <!-- Next 7 Days Prediction Plot -->
+        <div class="plots-container">
+          <div class="plot">
+            <h4>Next 7 Days Prediction</h4>
+            <img
+              src="data:image/png;base64,{{ plot_next_url }}"
+              alt="Next 7 Days Prediction Plot"
+              class="img-fluid"
+            />
+          </div>
+        </div>
+        {% endif %}{% if model_type == "Linear Regression" %}
+        <div class="results-section">
+          <h3>{{ ticker }} Linear Regression Results</h3>
+          <div class="plots-container">
+            <div class="plot">
+              <h4>Linear regression and LSTM combined next 7 days prediction plot</h4>
+              <img
+                src="data:image/png;base64,{{ plot_combine_url }}"
+                alt="Linear Regression Prediction Plot"
+                class="img-fluid"
+              />
+            </div>
+            <h4>Final Prediction</h4>
+          <div class="table-container">
+            <div class="table-responsive">{{ l_table | safe }}</div>
+          </div>
+           <div class="plot">
+              <h4>LSTM Actual Vs Predicted Prices Plot</h4>
+              <img
+                src="data:image/png;base64,{{ plot_lstm_url }}"
+                alt="LSTM Prediction Plot"
+                class="img-fluid"
+              />
+            </div>
+             <div class="plot">
+              <h4>Linear regression Actual Vs Predicted Prices Plot</h4>
+              <img
+                src="data:image/png;base64,{{ plot_linear_url }}"
+                alt="Linear Prediction Plot"
+                class="img-fluid"
+              />
+            </div>
+            <div class="plot">
+              <h4>Linear regression and LSTM combined vs LSTM alone next 7 days prediction plo</h4>
+              <img
+                src="data:image/png;base64,{{ plot_lstm_v_combine_url }}"
+                alt="Vs Prediction Plot"
+                class="img-fluid"
+              />
+            </div>
+          </div>
+      </div>
+      {% endif %}
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 Investment Platform. All rights reserved.</p>
+      </div>
+    </footer>
+    <script>
+    // First, let's make sure our loading functions are defined
+    function showLoading() {
+        console.log('Showing loading overlay'); // Debug log
+        const overlay = document.getElementById("loadingOverlay");
+        const body = document.body;
+        if (overlay) {
+            overlay.style.display = "flex";
+            body.classList.add("body-blur");
+        }
+    }
+
+    function hideLoading() {
+        console.log('Hiding loading overlay'); // Debug log
+        const overlay = document.getElementById("loadingOverlay");
+        const body = document.body;
+        if (overlay) {
+            overlay.style.display = "none";
+            body.classList.remove("body-blur");
+        }
+    }
+
+    // Wait for the document to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      const modelSelect = document.getElementById("model_type");
+        const userGuide = document.getElementById("userGuide");
+
+        // Show or hide user guide based on selected model
+        modelSelect.addEventListener("change", function () {
+          if (modelSelect.value === "Linear Regression") {
+            userGuide.style.display = "block";
+          } else {
+            userGuide.style.display = "none";
+          }
+        });
+        console.log('DOM Content Loaded'); // Debug log
+        
+        // Get the form element
+        const form = document.getElementById('predictionForm');
+        
+        if (form) {
+            console.log('Form found'); // Debug log
+            
+            form.addEventListener('submit', function(e) {
+                console.log('Form submitted'); // Debug log
+                
+                // Get selected tickers
+                const tickerSelect = document.getElementById('tickers');
+                const selectedTickers = tickerSelect.selectedOptions;
+                
+                // Validate ticker selection
+                if (selectedTickers.length === 0) {
+                    e.preventDefault(); // Stop form submission
+                    alert('Please select at least one ticker to predict.');
+                    return false;
+                }
+                
+                // If validation passes, show loading overlay
+                showLoading();
+                
+                // Let the form submit normally
+                return true;
+            });
+        } else {
+            console.log('Form not found - check your form ID'); // Debug log
+        }
+    });
+</script>
+    {% if tables or plots or plot_url or l_table or metrics_table %}
+<script>
+      // Add this to handle cases where we return with results
+        console.log('Results detected, hiding loading overlay'); // Debug log
+        hideLoading();
+</script>
+   {% endif %}
+  </body>
+</html>
