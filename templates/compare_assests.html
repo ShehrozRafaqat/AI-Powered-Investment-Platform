@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compare Assets</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      .navbar {
+        background-color: #182e6f;
+        color: white;
+      }
+      .navbar-brand {
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
+      .nav-links a {
+        color: white;
+        transition: color 0.3s ease;
+      }
+      .nav-links a:hover {
+        color: #d946ef;
+      }
+      .submit-button {
+        background-color: #081334;
+        transition: background-color 0.3s ease;
+      }
+      .submit-button:hover {
+        background-color: #7830de;
+      }
+      .hidden {
+        display: none;
+      }
+
+      .spinner-border {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        vertical-align: text-bottom;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+      }
+
+      @keyframes spinner-border {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .graph-container {
+        width: 100%;
+        margin: 0 auto;
+      }
+      .footer {
+        background-color: #f3f4f6; /* Light gray background */
+        padding: 2rem;
+        border-top: 1px solid #e5e7eb;
+        margin-top: 2rem;
+      }
+      .footer p {
+        font-size: 0.9rem;
+        color: #4b5563; /* Gray text */
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <nav class="navbar py-4 px-6 flex justify-between items-center">
+      <div class="navbar-brand">Investment Platform</div>
+      <ul class="nav-links flex space-x-4">
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-8 text-center">Compare Assets</h1>
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <form id="compareAssetsForm" class="space-y-4">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2"
+              >Tickers (comma-separated)</label
+            >
+            <input
+              type="text"
+              id="tickers"
+              class="shadow border rounded w-full py-2 px-3"
+              placeholder="AAPL.US, TSLA.US"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2"
+              >Currency</label
+            >
+            <select
+              id="currency"
+              class="shadow border rounded w-full py-2 px-3"
+            >
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="JPY">JPY</option>
+              <!-- Add more currencies as needed -->
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2"
+              >Metric</label
+            >
+            <select id="metric" class="shadow border rounded w-full py-2 px-3">
+              <option value="returns">Returns</option>
+              <option value="volatility">Volatility</option>
+              <option value="sharpe_ratio">Sharpe Ratio</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between">
+            <button
+              type="submit"
+              id="compareButton"
+              class="submit-button text-white font-bold py-2 px-4 rounded"
+            >
+              Compare
+            </button>
+          </div>
+        </form>
+        <div id="loadingSpinner" class="text-center mt-4 hidden">
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <p>Calculating comparison data...</p>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="results" class="hidden bg-white rounded-lg shadow-md p-4">
+        <div class="graph-container">
+          <div id="comparisonChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="container mx-auto px-4">
+        <h2 class="text-lg font-semibold mb-2">Compare Assets</h2>
+        <p>
+          Compare Assets widget helps you compare selected assets based on
+          different financial metrics like returns, volatility, and Sharpe
+          ratio.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // Make sure this runs after the DOM is fully loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        // Debug: Log to confirm the script is running
+        console.log("Asset comparison script loaded");
+
+        // Get references to key elements
+        const compareForm = document.getElementById("compareAssetsForm");
+        const loadingSpinner = document.getElementById("loadingSpinner");
+        const resultsSection = document.getElementById("results");
+        const compareButton = document.getElementById("compareButton");
+
+        // Debug: Log the elements to ensure they exist
+        console.log("Form element:", compareForm);
+        console.log("Loading spinner:", loadingSpinner);
+        console.log("Results section:", resultsSection);
+
+        // Attach event listener to the form
+        if (compareForm) {
+          compareForm.addEventListener("submit", handleComparisonSubmit);
+          console.log("Event listener attached to form");
+        } else {
+          console.error("Could not find comparison form element!");
+        }
+
+        // Form submission handler function
+        async function handleComparisonSubmit(event) {
+          // Prevent the default form submission
+          event.preventDefault();
+          console.log("Form submitted");
+
+          // Get ticker values and metric selection
+          const tickersInput = document.getElementById("tickers");
+          const metricSelect = document.getElementById("metric");
+          const currencySelect = document.getElementById("currency"); // Get currency input
+
+          if (!tickersInput || !metricSelect) {
+            console.error("Could not find form input elements");
+            return;
+          }
+
+          const tickers = tickersInput.value.split(",").map((t) => t.trim());
+          const metric = metricSelect.value;
+
+          console.log("Tickers:", tickers);
+          console.log("Metric:", metric);
+
+          // Validate input
+          if (tickers.length === 0 || tickers[0] === "") {
+            alert("Please enter at least one ticker.");
+            return;
+          }
+
+          // Show loading spinner, hide results
+          if (loadingSpinner) {
+            loadingSpinner.classList.remove("hidden");
+            console.log("Loading spinner shown");
+          }
+
+          if (resultsSection) {
+            resultsSection.classList.add("hidden");
+          }
+
+          // Disable the compare button during processing
+          if (compareButton) {
+            compareButton.disabled = true;
+            compareButton.textContent = "Processing...";
+          }
+
+          try {
+            console.log("Fetching comparison data...");
+
+            // Make API request
+            const response = await fetch("/compare_assets", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tickers, metric }),
+            });
+
+            console.log("Response received:", response.status);
+
+            const data = await response.json();
+            if (!response.ok || data.error) {
+              alert(data.error || "Failed to fetch asset comparison");
+              console.error("API error:", data.error);
+              return;
+            }
+
+            console.log("Data received:", data);
+
+            // Prepare traces for each asset
+            const traces = [];
+
+            // Add traces for individual assets
+            for (const [assetName, values] of Object.entries(data.series)) {
+              traces.push({
+                x: data.dates,
+                y: values,
+                type: "scatter",
+                mode: "lines",
+                name: assetName,
+                line: {
+                  width: 1.5,
+                },
+              });
+            }
+
+            console.log("Created traces for chart");
+
+            // Determine appropriate title based on metric
+            let title = "Asset Comparison";
+            let yaxisTitle = "";
+
+            if (metric === "returns") {
+              title = "Cumulative Returns Comparison";
+              yaxisTitle = "Wealth Index";
+            } else if (metric === "volatility") {
+              title = "Annualized Volatility Comparison";
+              yaxisTitle = "Risk (%)";
+            } else if (metric === "sharpe_ratio") {
+              title = "Sharpe Ratio Comparison";
+              yaxisTitle = "Sharpe Ratio";
+            }
+
+            const layout = {
+              title: title,
+              xaxis: {
+                title: "Date",
+                rangeslider: {}, // Add a range slider for time period selection
+                type: "date",
+              },
+              yaxis: {
+                title: yaxisTitle,
+                hoverformat: ".2f",
+              },
+              showlegend: true,
+              legend: {
+                x: 1,
+                xanchor: "right",
+                y: 1,
+              },
+              hovermode: "x unified", // Show all values for a given date on hover
+              plot_bgcolor: "white",
+              paper_bgcolor: "white",
+              grid: { rows: 1, columns: 1, pattern: "independent" },
+              margin: { l: 50, r: 50, t: 50, b: 50 },
+            };
+
+            const config = {
+              responsive: true,
+              displayModeBar: true,
+              displaylogo: false,
+              modeBarButtonsToAdd: [
+                "drawline",
+                "drawopenpath",
+                "drawcircle",
+                "drawrect",
+                "eraseshape",
+              ],
+            };
+
+            // Plot the chart and show results
+            const chartElement = document.getElementById("comparisonChart");
+            if (chartElement) {
+              console.log("Creating plot");
+              Plotly.newPlot("comparisonChart", traces, layout, config);
+              resultsSection.classList.remove("hidden");
+              console.log("Chart displayed");
+            } else {
+              console.error("Could not find chart element");
+            }
+          } catch (error) {
+            console.error("Error during comparison:", error);
+            alert("Error: " + error.message);
+          } finally {
+            // Hide loading spinner, re-enable button
+            if (loadingSpinner) {
+              loadingSpinner.classList.add("hidden");
+            }
+
+            if (compareButton) {
+              compareButton.disabled = false;
+              compareButton.textContent = "Compare";
+            }
+
+            console.log("Comparison process complete");
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

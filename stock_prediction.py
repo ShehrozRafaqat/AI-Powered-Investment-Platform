@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import joblib
 from datetime import datetime
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
@@ -12,10 +13,10 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import os
 
 # logistic regression
-def get_stock_data(ticker, start_date='2020-01-01', end_date=datetime.now()):
+def get_stock_data(ticker, start_date='2020-01-01', end_date=datetime.now(), auto_adjust=False):
 
     # Fetch stock data
-    stock_data = yf.download(ticker, start=start_date, end=end_date)
+    stock_data = yf.download(ticker, start=start_date, end=end_date, auto_adjust=False)
     stock_data.columns = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
     stock_data = stock_data.reset_index()    
     stock_data['Date'] = stock_data['Date'].dt.tz_localize(None)
@@ -158,7 +159,8 @@ def load_lstm_model(ticker, model_path=None):
 def prepare_lstm_test_data(ticker, start_date='2020-01-01', end_date=datetime.now()):
 
     # Fetch stock data
-    stock_data = yf.download(ticker, start=start_date, end=end_date)
+    stock_data = get_stock_data(ticker)
+    print("THis is the stock data:", stock_data)
     
     # Extract close prices
     close_prices = stock_data['Adj Close'].values.reshape(-1, 1)
@@ -219,7 +221,7 @@ def predict_next_7_days(ticker, model_path):
         return None, None
     
     # Fetch and preprocess data
-    stock_data = yf.download(ticker, start='2020-01-01', end=datetime.now())
+    stock_data = get_stock_data(ticker)
     close_prices = stock_data['Adj Close'].values.reshape(-1, 1)
     
     scaler = MinMaxScaler(feature_range=(0, 1))

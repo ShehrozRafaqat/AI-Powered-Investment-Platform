@@ -18,6 +18,7 @@ import plotly
 import plotly.graph_objs as go
 import types
 from itertools import chain
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -91,6 +92,46 @@ def logout():
     flash('Logged out successfully.', 'success')
     return redirect('/')
 
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized. Please log in.'}), 401
+
+    user_query = request.json.get('query')
+
+    # Replace with your Kaggle notebook's API endpoint
+    KAGGLE_NOTEBOOK_API_URL = "https://0d71-35-194-9-32.ngrok-free.app/api"
+
+    try:
+        # Send the user query to the Kaggle notebook
+        response = requests.post(
+            KAGGLE_NOTEBOOK_API_URL,
+            json={'query': user_query},
+            timeout=10  # Add a timeout
+        )
+
+        # Check if the Kaggle notebook responded successfully
+        if response.status_code == 200:
+            chatbot_response = response.json().get('response')
+            return jsonify({'response': chatbot_response})
+        else:
+            # Get more detailed error information
+            error_details = response.text
+            print(f"Kaggle API error: Status {response.status_code}, Details: {error_details}")
+            return jsonify({
+                'response': f'GPU unavailable. Status code: {response.status_code}. Try again later.'
+            }), 503
+
+    except requests.exceptions.ConnectionError:
+        print("Connection error to Kaggle notebook")
+        return jsonify({'response': 'Unable to connect to the chatbot. The service might be down.'}), 503
+    except requests.exceptions.Timeout:
+        print("Timeout connecting to Kaggle notebook")
+        return jsonify({'response': 'The chatbot is taking too long to respond. Try again later.'}), 504
+    except requests.exceptions.RequestException as e:
+        print(f"Request exception: {e}")
+        return jsonify({'response': f'Error connecting to the chatbot: {str(e)}. Try again later.'}), 500
+        
 # Investment profile route
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
@@ -689,6 +730,111 @@ def efficient_frontier_analysis():
     except Exception as e:
         print(f"Error in efficient frontier analysis: {e}")
         return jsonify({'error': str(e)}), 400
+
+@app.route('/compare_assets', methods=['GET'])
+def compare_assets_page():
+    return render_template('compare_assests.html')
+
+@app.route('/compare_assets', methods=['POST'])
+def compare_assets():
+    try:
+        data = request.json
+        tickers = data.get('tickers')
+        metric = data.get('metric', 'returns')
+        currency = data.get('currency', 'USD')
+        
+        # Validate input
+        if not tickers or len(tickers) < 1:
+            return jsonify({'error': 'At least one ticker is required.'}), 400
+        
+        # Create AssetList object - WITHOUT specifying dates at first
+        try:
+            asset_list = ok.AssetList(
+                assets=tickers, 
+                ccy=currency
+            )
+            
+            print(f"Asset list using dates: first_date={asset_list.first_date}, last_date={asset_list.last_date}")
+            
+        except Exception as e:
+            print(f"Error creating AssetList: {e}")
+            return jsonify({'error': f'Failed to create AssetList: {str(e)}'}), 400
+        
+        try:
+            # Get asset names for better labeling
+            asset_names = asset_list.names
+            
+            # Dictionary to store time series for each asset
+            series_data = {}
+            dates = []
+            
+            if metric == 'returns':
+                # For returns, use wealth_indexes which shows cumulative returns over time
+                wealth_indexes = asset_list.wealth_indexes
+                
+                # Convert DataFrame to the format needed for plotting
+                dates = wealth_indexes.index.strftime('%Y-%m-%d').tolist()
+                
+                # For each asset, get its wealth index time series
+                for ticker in tickers:
+                    if ticker in wealth_indexes.columns:
+                        display_name = asset_names.get(ticker, ticker)
+                        series_data[display_name] = wealth_indexes[ticker].tolist()
+                
+            elif metric == 'volatility':
+                # For volatility, use risk_annual which gives expanding window risk
+                risk_series = asset_list.risk_annual
+                
+                # Convert DataFrame to the format needed for plotting
+                dates = risk_series.index.strftime('%Y-%m-%d').tolist()
+                
+                # For each asset, get its risk time series
+                for ticker in tickers:
+                    if ticker in risk_series.columns:
+                        display_name = asset_names.get(ticker, ticker)
+                        series_data[display_name] = risk_series[ticker].tolist()
+                
+            elif metric == 'sharpe_ratio':
+                # For Sharpe ratio, we need to calculate it for different periods
+                # We'll use rolling windows to show how Sharpe ratio evolves
+                # First get rolling returns and risk for a 12-month window
+                rolling_returns = asset_list.get_rolling_cagr(window=12)
+                rolling_risk = asset_list.get_rolling_risk_annual(window=12)
+                
+                # Calculate Sharpe ratio manually for each period
+                sharpe_series = (rolling_returns - 0) / rolling_risk  # Using 0 as risk-free rate
+                
+                # Convert DataFrame to the format needed for plotting
+                dates = sharpe_series.index.strftime('%Y-%m-%d').tolist()
+                
+                # For each asset, get its Sharpe ratio time series
+                for ticker in tickers:
+                    if ticker in sharpe_series.columns:
+                        display_name = asset_names.get(ticker, ticker)
+                        series_data[display_name] = sharpe_series[ticker].tolist()
+            
+            else:
+                return jsonify({'error': f'Unsupported metric: {metric}'}), 400
+            
+            if not series_data:
+                return jsonify({'error': 'No valid data found for the selected tickers'}), 400
+                
+            # Return the time series data
+            return jsonify({
+                'dates': dates,
+                'series': series_data,
+                'metric': metric,
+                'currency': currency
+            })
+            
+        except Exception as e:
+            print(f"Error in metric calculation: {e}")
+            return jsonify({'error': f'Failed to calculate {metric}: {str(e)}'}), 400
+            
+    except Exception as e:
+        print(f"Error in asset comparison: {e}")
+        return jsonify({'error': str(e)}), 400
+
 
 if __name__ == '__main__':
     app.run(debug=True)

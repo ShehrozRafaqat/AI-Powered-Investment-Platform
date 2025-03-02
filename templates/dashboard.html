@@ -3,14 +3,166 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Investment Platform</title>
+    <title>Investment Chatbot</title>
     <link rel="stylesheet" href="/static/css/styledashboard.css" />
+    <style>
+      /* Global Styles */
+      body {
+        font-family: "Calibri", sans-serif;
+        margin: 0;
+        background-color: #f4f7fa;
+      }
+
+      /* Navigation Bar */
+      .navbar {
+        background: #182e6f;
+        color: #fff;
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      .navbar .brand {
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .navbar .nav-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 20px;
+      }
+
+      .navbar .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        transition: color 0.3s ease;
+      }
+
+      .navbar .nav-links a:hover {
+        color: #a283ce;
+      }
+
+      /* Chatbot Section */
+      .chatbot-section {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .chatbot-section h3 {
+        font-size: 24px;
+        color: #0d2c86;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .chatbox {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .chat-log {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #aca7b3;
+      }
+
+      .chat-log .user-message,
+      .chat-log .bot-message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 70%;
+      }
+
+      .chat-log .user-message {
+        background-color: #5212ac;
+        color: white;
+        align-self: flex-end;
+      }
+
+      .chat-log .bot-message {
+        background-color: #e9ecef;
+        color: #333;
+        align-self: flex-start;
+      }
+
+      .chat-log .error {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+
+      .chat-input {
+        display: flex;
+        gap: 10px;
+      }
+
+      .chat-input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+      }
+
+      .chat-input button {
+        padding: 10px 20px;
+        background-color: #081334;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      .chat-input button:hover {
+        background-color: #7830de;
+      }
+
+      /* Footer */
+      .footer {
+        background: #182e6f;
+        color: #fff;
+        text-align: center;
+        padding: 1rem 0;
+        margin-top: 50px;
+      }
+
+      .footer .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+    </style>
   </head>
   <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
       <div class="container">
-        <h1 class="brand">Investment Platform</h1>
+        <h1 class="brand">Investment Chatbot</h1>
         <ul class="nav-links">
           <li><a href="/sentiment">Analyze Stock sentiment</a></li>
           <li><a href="/stock-prediction">Predict Stock Prices</a></li>
@@ -21,40 +173,23 @@
       </div>
     </nav>
 
-    <!-- Dashboard Content -->
-    <section class="dashboard">
+    <!-- Chatbot Section -->
+    <section class="chatbot-section">
       <div class="container">
         <h2>Welcome {{ username }}</h2>
         <p>
-          We're glad to have you on board! Here's a summary of your investment
-          activities:
+          We're glad to have you on board! Feel free to ask me anything about
+          investments. I'm here to help you with your queries.
         </p>
-
-        <!-- Investment Overview Section -->
-        <div class="investment-overview">
-          <h3>Investment Overview</h3>
-          <div class="overview-box">
-            <p><strong>Total Portfolio Value:</strong> $10,000</p>
-            <p><strong>Stocks in Portfolio:</strong> 5</p>
-            <p><strong>Latest Predictions:</strong> +3.5% in the last month</p>
-          </div>
-        </div>
-
-        <!-- Investment Recommendations Section -->
-        <div class="recommendations">
-          <h3>Your Personalized Investment Recommendations</h3>
-          <div class="recommendation-box">
-            <p>
-              <strong>Recommendation 1:</strong> Buy 100 shares of Company XYZ
-            </p>
-            <p>
-              <strong>Recommendation 2:</strong> Hold your investment in ABC
-              Corp
-            </p>
-            <p>
-              <strong>Recommendation 3:</strong> Diversify into the healthcare
-              sector
-            </p>
+        <div class="chatbox">
+          <div id="chat-log" class="chat-log"></div>
+          <div class="chat-input">
+            <input
+              type="text"
+              id="user-query"
+              placeholder="Ask me anything about investments..."
+            />
+            <button id="send-query">Send</button>
           </div>
         </div>
       </div>
@@ -66,5 +201,53 @@
         <p>&copy; 2025 Investment Platform. All rights reserved.</p>
       </div>
     </footer>
+
+    <!-- JavaScript for Chatbot Interaction -->
+    <script>
+      document
+        .getElementById("send-query")
+        .addEventListener("click", async () => {
+          const userQuery = document.getElementById("user-query").value;
+          const chatLog = document.getElementById("chat-log");
+
+          if (!userQuery) {
+            alert("Please enter a query.");
+            return;
+          }
+
+          // Add the user's query to the chat log
+          chatLog.innerHTML += `<div class="user-message"><strong>You:</strong> ${userQuery}</div>`;
+
+          // Send the query to the Flask backend
+          try {
+            const response = await fetch("/chatbot", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ query: userQuery }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Add the chatbot's response to the chat log
+              chatLog.innerHTML += `<div class="bot-message"><strong>Bot:</strong> ${data.response}</div>`;
+            } else {
+              // Handle errors
+              chatLog.innerHTML += `<div class="bot-message error"><strong>Error:</strong> ${data.response}</div>`;
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            chatLog.innerHTML += `<div class="bot-message error"><strong>Error:</strong> Failed to connect to the chatbot.</div>`;
+          }
+
+          // Clear the input field
+          document.getElementById("user-query").value = "";
+
+          // Scroll to the bottom of the chat log
+          chatLog.scrollTop = chatLog.scrollHeight;
+        });
+    </script>
   </body>
 </html>
