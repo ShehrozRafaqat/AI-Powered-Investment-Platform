@@ -1,11 +1,13 @@
 /* Styles for Profile Page */
 body {
-  font-family: "Calibri", sans-serif;
+  font-family: "Inter", sans-serif;
   margin: 0;
+  background-color: #202123;
+  color: #FFFFFF;
 }
 .profile {
   padding: 50px 0;
-  background-color: #f9f9f9;
+  background-color: #202123;
 }
 
 .profile .container {
@@ -16,7 +18,7 @@ body {
 
 h2 {
   font-size: 36px;
-  color: #333;
+  color: white;
   margin-bottom: 20px;
 }
 
@@ -28,7 +30,7 @@ p {
 
 /* Profile Form */
 .profile-form {
-  background-color: #fff;
+  background-color: #2A2B2E;
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -37,20 +39,37 @@ p {
 
 .profile-form label {
   font-size: 18px;
-  color: #333;
+  color: white;
   display: block;
   margin: 15px 0 5px;
 }
 
-.profile-form select,
+.profile-form select {
+  font-size: 16px;
+  padding: 12px;
+  width: 100%;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #3E3F42;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  -webkit-appearance: none;
+}
 .profile-form input,
 .profile-form textarea {
-  width: 100%;
-  padding: 10px;
+  width: 96%;
+  padding: 12px;
   font-size: 16px;
   margin-bottom: 20px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 8px;
+  background-color: #3E3F42;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .profile-form textarea {
@@ -61,7 +80,7 @@ p {
 .profile-form button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: #10A37F;
   color: white;
   border: none;
   border-radius: 5px;
@@ -70,36 +89,15 @@ p {
 }
 
 .profile-form button:hover {
-  background-color: #0056b3;
-}
-
-/* Back Button */
-.back-btn {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #081334;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.back-btn:hover {
-  background-color: #7830de;
+  background-color: #0D8A6F;
 }
 
 /* Footer */
-.footer {
-  background: #182e6f;
-  color: #fff;
-  text-align: center;
-  padding: 1rem 0;
-}
+
 
 /* Navigation Bar */
 .navbar {
-  background: #182e6f;
+  background: #444654;
   color: #fff;
   padding: 1rem 0;
   position: sticky;
@@ -136,5 +134,5 @@ p {
 }
 
 .navbar .nav-links a:hover {
-  text-decoration: underline;
+   color: #10A37F;
 }

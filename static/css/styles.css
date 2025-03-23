@@ -6,11 +6,12 @@ body {
   color: #333;
   line-height: 1.6;
   box-sizing: border-box;
+  background: #202123;
 }
 
 /* Navbar */
 .navbar {
-  background: #182e6f;
+  background: #444654;
   color: #fff;
   padding: 1rem 0;
   position: sticky;
@@ -50,7 +51,7 @@ body {
 }
 
 .navbar .nav-links a:hover {
-  color: #ffcc00;
+  color: #10A37F;
 }
 
 /* Hero Section */
@@ -72,8 +73,7 @@ body {
 }
 
 .hero .btn {
-  background: #ffcc00;
-  color: #333;
+  background: #10A37F;
   padding: 0.8rem 1.5rem;
   text-decoration: none;
   border-radius: 5px;
@@ -82,12 +82,12 @@ body {
 }
 
 .hero .btn:hover {
-  background: #e6b800;
+  background: #0D8A6F;
 }
 
 /* Features Section */
 .features {
-  background: #f4f4f4;
+  background: #202123;
   padding: 2rem 0;
 }
 
@@ -98,6 +98,15 @@ body {
 .features h2 {
   margin-bottom: 2rem;
   font-size: 2rem;
+  color: white;
+}
+
+.features h3 {
+  color: white;
+}
+
+.feature p {
+  color: gray
 }
 
 .features .feature-grid {
@@ -107,7 +116,7 @@ body {
 }
 
 .features .feature {
-  background: #fff;
+  background: #2A2B2E;
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -116,7 +125,7 @@ body {
 
 .features .feature i {
   font-size: 2rem;
-  color: #004080;
+  color: #10A37F;
   margin-bottom: 1rem;
 }
 
@@ -127,18 +136,18 @@ body {
 
 /* Footer */
 .footer {
-  background: #182e6f;
-  color: #fff;
+  background: #202123;
+  color: gray;
   text-align: center;
   padding: 1rem 0;
 }
 .signup-section {
-  background: #ffffff;
+  background: #202123;
   padding: 50px 0;
 }
 
 .signup-box {
-  background: #ffffff;
+  background: #2A2B2E;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
   padding: 30px;
   max-width: 500px;
@@ -150,7 +159,7 @@ body {
 .signup-box h2 {
   margin-bottom: 20px;
   font-size: 28px;
-  color: #2c3e50;
+  color: white;
 }
 
 .input-group {
@@ -162,21 +171,22 @@ body {
   width: 100%;
   padding: 15px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #3E3F42;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #3E3F42;
+  color: white;
 }
 
 .input-group input:focus {
-  border-color: #3498db;
-  background-color: #fff;
+  border-color: #10A37F;
+  color: white;
 }
 
 .btn {
   width: 100%;
   padding: 15px;
   font-size: 16px;
-  background-color: #3498db;
+  background-color: #10A37F;
   color: white;
   border: none;
   border-radius: 8px;
@@ -185,13 +195,15 @@ body {
 }
 
 .btn:hover {
-  background-color: #2980b9;
+  background-color: #0D8A6F;
 }
 
 /* Login Link */
 .login-link {
   margin-top: 20px;
   font-size: 16px;
+  color: gray;
+
 }
 
 .login-link a {

@@ -10,8 +10,26 @@
     />
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
+      :root {
+       --custom-dark: #202123;
+       --custom-lightDark: #2A2B2E;
+       --custom-Input: #3E3F42;
+      }
+
+      .bg-custom-dark {
+        background-color: var(--custom-dark);
+      }
+      .text-custom-dark {
+        color: var(--custom-dark);
+      }
+      .bg-custom-lightDark {
+        background-color: var(--custom-lightDark);
+      }
+      .bg-custom-Input {
+        background-color: var(--custom-Input);
+      }
       .navbar {
-        background-color: #182e6f;
+        background-color: #444654;
         color: white;
       }
       .navbar-brand {
@@ -23,35 +41,36 @@
         transition: color 0.3s ease;
       }
       .nav-links a:hover {
-        color: #d946ef; /* Purple on hover */
+        color: #10A37F; /* Purple on hover */
       }
       .submit-button {
-        background-color: #081334; /* Dark blue */
+        background-color: #10A37F; /* Dark blue */
         transition: background-color 0.3s ease;
       }
       .submit-button:hover {
-        background-color: #7830de; /* Purple */
+        background-color: #0D8A6F; /* Purple */
       }
       #loadingSpinner .animate-spin {
-        border-top-color: #934ef3; /* Top border is transparent */
-        border-right-color: #290b53; /* Right border is transparent */
-        border-bottom-color: #5212ac; /* Bottom border is transparent */
-        border-left-color: #7830de; /* Left border uses the desired color */
+        border-top-color: #0D8A6F; /* Top border is transparent */
+        border-right-color: #045a47; /* Right border is transparent */
+        border-bottom-color: #03382d; /* Bottom border is transparent */
+        border-left-color: #10A37F; /* Left border uses the desired color */
         border-width: 3px; /* Adjust thickness if needed */
       }
       .footer {
-        background-color: #f3f4f6; /* Light gray background */
+        background-color: #444654; /* Light gray background */
         padding: 2rem;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid #444654;
+        border-radius: 10px;
         margin-top: 2rem;
       }
       .footer p {
         font-size: 0.9rem;
-        color: #4b5563; /* Gray text */
+        color: #f3f4f6; /* Gray text */
       }
     </style>
   </head>
-  <body class="bg-gray-100">
+  <body class="bg-custom-dark text-white">
     <nav class="navbar py-4 px-6 flex justify-between items-center">
       <div class="navbar-brand">Investment Platform</div>
       <ul class="nav-links flex space-x-4">
@@ -65,37 +84,37 @@
       <h1 class="text-3xl font-bold mb-8">Portfolio Analysis</h1>
 
       <!-- Input Form -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div class="bg-custom-lightDark rounded-lg shadow-md p-6 mb-8">
         <form id="portfolioForm" class="space-y-4">
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">
-              Tickers (comma-separated, with .US suffix)
+            <label class="block text-white text-sm font-bold mb-2">
+              Tickers (comma-separated)
             </label>
             <input
               type="text"
               id="tickers"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input rounded w-full py-2 px-3"
               placeholder="AAPL.US, MSFT.US, GOOGL.US"
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">
+            <label class="block text-white text-sm font-bold mb-2">
               Weights (comma-separated decimals)
             </label>
             <input
               type="text"
               id="weights"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input rounded w-full py-2 px-3"
               placeholder="0.4, 0.3, 0.3"
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2"
+            <label class="block text-white text-sm font-bold mb-2"
               >Currency</label
             >
             <select
               id="currency"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input rounded w-full py-2 px-3">
             >
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
@@ -103,12 +122,12 @@
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2"
+            <label class="block text-white text-sm font-bold mb-2"
               >Rebalancing Period</label
             >
             <select
               id="rebalancingPeriod"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input rounded w-full py-2 px-3"
             >
               <option value="month">Monthly</option>
               <option value="quarter">Quarterly</option>
@@ -147,27 +166,27 @@
       <div id="results" class="hidden">
         <!-- Metrics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="text-2xl font-bold" id="annualRisk" style="color: #7830de;">
+          <div class="bg-custom-lightDark rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold" id="annualRisk" style="color: #10A37F;">
               -
             </div>
             <div class="text-gray-600 text-sm">Annual Risk (%)</div>
           </div>
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="text-2xl font-bold" id="sharpeRatio" style="color: #7830de;">
+          <div class="bg-custom-lightDark rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold" id="sharpeRatio" style="color: #10A37F;">
               -
             </div>
             <div class="text-gray-600 text-sm">Sharpe Ratio</div>
           </div>
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="text-2xl font-bold" id="cagr" style="color: #7830de;">-</div>
+          <div class="bg-custom-lightDark rounded-lg shadow-md p-6">
+            <div class="text-2xl font-bold" id="cagr" style="color: #10A37F;">-</div>
             <div class="text-gray-600 text-sm">CAGR (%)</div>
           </div>
-          <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="bg-custom-lightDark rounded-lg shadow-md p-6">
             <div
               class="text-2xl font-bold"
               id="diversificationRatio"
-              style="color: #7830de;"
+              style="color: #10A37F;"
             >
               -
             </div>
@@ -176,16 +195,16 @@
         </div>
 
         <!-- Charts -->
-          <div class="bg-white rounded-lg shadow-md p-4">
+          <div class="bg-custom-lightDark rounded-lg shadow-md p-4">
             <div id="weightsChart"></div>
           </div>
-          <div class="bg-white rounded-lg shadow-md p-4">
+          <div class="bg-custom-lightDark rounded-lg shadow-md p-4">
             <div id="performanceChart"></div>
           </div>
-      <div class="bg-white rounded-lg shadow-md p-4">
+      <div class="bg-custom-lightDark rounded-lg shadow-md p-4">
             <div id="correlationMatrix"></div>
         </div>
-       <div class="bg-white rounded-lg shadow-md p-4">
+       <div class="bg-custom-lightDark rounded-lg shadow-md p-4">
             <h3 class="text-lg font-semibold mb-4">Portfolio Wealth Index</h3>
             <div id="wealthIndexPlot"></div>
         </div>
@@ -207,228 +226,247 @@
 
     <script>
       function createWealthIndexPlot(plotData) {
-        // Prepare traces for each asset and the portfolio
-        const traces = [];
+  // Prepare traces for each asset and the portfolio
+  const traces = [];
 
-        // Add traces for individual assets
-        for (const [assetName, values] of Object.entries(plotData.series)) {
-          traces.push({
-            x: plotData.dates,
-            y: values,
-            type: "scatter",
-            mode: "lines",
-            name: assetName,
-            // Make portfolio line thicker and more prominent
-            line: {
-              width: assetName === "Portfolio" ? 3 : 1.5,
-              dash: assetName === "Portfolio" ? "solid" : "dot",
-            },
-          });
-        }
-
-        const layout = {
-          title: "Portfolio and Asset Wealth Indexes",
-          xaxis: {
-            title: "Date",
-            rangeslider: {}, // Add a range slider for time period selection
-            type: "date",
-          },
-          yaxis: {
-            title: "Value",
-            hoverformat: ".2f",
-          },
-          showlegend: true,
-          legend: {
-            x: 1,
-            xanchor: "right",
-            y: 1,
-          },
-          hovermode: "x unified", // Show all values for a given date on hover
-          plot_bgcolor: "white",
-          paper_bgcolor: "white",
-          grid: { rows: 1, columns: 1, pattern: "independent" },
-          margin: { l: 50, r: 50, t: 50, b: 50 },
-        };
-
-        const config = {
-          responsive: true,
-          displayModeBar: true,
-          displaylogo: false,
-          modeBarButtonsToAdd: [
-            "drawline",
-            "drawopenpath",
-            "drawcircle",
-            "drawrect",
-            "eraseshape",
-          ],
-        };
-
-        Plotly.newPlot("wealthIndexPlot", traces, layout, config);
-      }
-      document
-        .getElementById("portfolioForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          // Show loading spinner, hide results and error message
-          const loadingSpinner = document.getElementById("loadingSpinner");
-          const resultsSection = document.getElementById("results");
-          const errorMessage = document.getElementById("errorMessage");
-          const submitButton = document.getElementById("submitButton");
-
-          loadingSpinner.classList.remove("hidden");
-          submitButton.disabled = true;
-          resultsSection.classList.add("hidden");
-          errorMessage.classList.add("hidden");
-
-          const tickers = document
-            .getElementById("tickers")
-            .value.split(",")
-            .map((t) => t.trim());
-          const weights = document
-            .getElementById("weights")
-            .value.split(",")
-            .map((w) => parseFloat(w.trim()));
-          const currency = document.getElementById("currency").value;
-          const rebalancingPeriod =
-            document.getElementById("rebalancingPeriod").value;
-
-          // Validate inputs
-          if (
-            tickers.length === 0 ||
-            weights.length === 0 ||
-            tickers.length !== weights.length
-          ) {
-            showError(
-              "Tickers and weights must be provided and must have the same length."
-            );
-            return;
-          }
-
-          // Validate weights sum to 1
-          const weightSum = weights.reduce((a, b) => a + b, 0);
-          if (Math.abs(weightSum - 1) > 0.0001) {
-            showError("Weights must sum to 1");
-            return;
-          }
-
-          try {
-            const response = await fetch("/portfolio_analysis", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                tickers,
-                weights,
-                currency,
-                rebalancing_period: rebalancingPeriod,
-              }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-              throw new Error(data.error || "Failed to analyze portfolio");
-            }
-
-            if (data.error) {
-              throw new Error(data.error);
-            }
-            // Update metrics
-            document.getElementById("annualRisk").textContent =
-              data.metrics.annual_risk;
-            document.getElementById("sharpeRatio").textContent =
-              data.metrics.sharpe_ratio;
-            document.getElementById("cagr").textContent = data.metrics.cagr;
-            document.getElementById("diversificationRatio").textContent =
-              data.metrics.diversification_ratio;
-
-            // Plot charts
-            Plotly.newPlot(
-              "performanceChart",
-              [
-                {
-                  x: data.performance.dates,
-                  y: data.performance.values,
-                  type: "scatter",
-                  name: "Portfolio Value",
-                },
-              ],
-              {
-                title: "Portfolio Performance",
-                xaxis: { title: "Date" },
-                yaxis: { title: "Portfolio Value" },
-              }
-            );
-
-            Plotly.newPlot(
-              "weightsChart",
-              [
-                {
-                  values: data.weights.weights,
-                  labels: data.weights.assets,
-                  type: "pie",
-                  name: "Portfolio Weights",
-                },
-              ],
-              {
-                title: "Asset Allocation",
-              }
-            );
-
-const correlationData = [
-  {
-    z: Object.values(data.correlation).map((row) => Object.values(row)),
-    x: Object.keys(data.correlation),
-    y: Object.keys(data.correlation),
-    type: "heatmap",
-    colorscale: "RdBu",
-    colorbar: {
-      title: "Correlation",
-    },
-  },
-];
-
-// Add annotations for cell values
-const annotations = [];
-const zData = Object.values(data.correlation).map((row) => Object.values(row));
-const xLabels = Object.keys(data.correlation);
-const yLabels = Object.keys(data.correlation);
-
-for (let i = 0; i < zData.length; i++) {
-  for (let j = 0; j < zData[i].length; j++) {
-    annotations.push({
-      x: xLabels[j],
-      y: yLabels[i],
-      text: zData[i][j].toFixed(2), // Round to 2 decimal places
-      font: {
-        color: zData[i][j] > 0.5 || zData[i][j] < -0.5 ? "white" : "black",
+  // Add traces for individual assets
+  for (const [assetName, values] of Object.entries(plotData.series)) {
+    traces.push({
+      x: plotData.dates,
+      y: values,
+      type: "scatter",
+      mode: "lines",
+      name: assetName,
+      // Make portfolio line thicker and more prominent
+      line: {
+        width: assetName === "Portfolio" ? 3 : 1.5,
+        dash: assetName === "Portfolio" ? "solid" : "dot",
       },
-      showarrow: false,
     });
   }
+
+  const layout = {
+    title: "Portfolio and Asset Wealth Indexes",
+    xaxis: {
+      title: "Date",
+      rangeslider: {}, // Add a range slider for time period selection
+      type: "date",
+      color: "white",
+    },
+    yaxis: {
+      title: "Value",
+      hoverformat: ".2f",
+      color: "white",
+    },
+    showlegend: true,
+    legend: {
+      x: 1,
+      xanchor: "right",
+      y: 1,
+      font: { color: "white" }
+    },
+    hovermode: "x unified", // Show all values for a given date on hover
+    plot_bgcolor: "#2A2B2E",
+    paper_bgcolor: "#2A2B2E",
+    grid: { rows: 1, columns: 1, pattern: "independent" },
+    margin: { l: 50, r: 50, t: 50, b: 50 },
+    font: { color: "white" }
+  };
+
+  const config = {
+    responsive: true,
+    displayModeBar: true,
+    displaylogo: false,
+    modeBarButtonsToAdd: [
+      "drawline",
+      "drawopenpath",
+      "drawcircle",
+      "drawrect",
+      "eraseshape",
+    ],
+  };
+
+  Plotly.newPlot("wealthIndexPlot", traces, layout, config);
 }
+document
+  .getElementById("portfolioForm")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-// Configure layout
-const layout = {
-  title: "Correlation Matrix",
-  annotations: annotations,
-  xaxis: {
-    title: "Stocks",
-    side: "bottom",
-  },
-  yaxis: {
-    title: "Stocks",
-    autorange: "reversed", // Keep the order consistent with the heatmap
-  },
-};
+    // Show loading spinner, hide results and error message
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const resultsSection = document.getElementById("results");
+    const errorMessage = document.getElementById("errorMessage");
+    const submitButton = document.getElementById("submitButton");
 
-Plotly.newPlot("correlationMatrix", correlationData, layout);
+    loadingSpinner.classList.remove("hidden");
+    submitButton.disabled = true;
+    resultsSection.classList.add("hidden");
+    errorMessage.classList.add("hidden");
 
-            if (data.wealth_plot_data) {
-              createWealthIndexPlot(data.wealth_plot_data);
-            }
+    const tickers = document
+      .getElementById("tickers")
+      .value.split(",")
+      .map((t) => t.trim());
+    const weights = document
+      .getElementById("weights")
+      .value.split(",")
+      .map((w) => parseFloat(w.trim()));
+    const currency = document.getElementById("currency").value;
+    const rebalancingPeriod =
+      document.getElementById("rebalancingPeriod").value;
+
+    // Validate inputs
+    if (
+      tickers.length === 0 ||
+      weights.length === 0 ||
+      tickers.length !== weights.length
+    ) {
+      showError(
+        "Tickers and weights must be provided and must have the same length."
+      );
+      return;
+    }
+
+    // Validate weights sum to 1
+    const weightSum = weights.reduce((a, b) => a + b, 0);
+    if (Math.abs(weightSum - 1) > 0.0001) {
+      showError("Weights must sum to 1");
+      return;
+    }
+
+    try {
+      const response = await fetch("/portfolio_analysis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tickers,
+          weights,
+          currency,
+          rebalancing_period: rebalancingPeriod,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to analyze portfolio");
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      // Update metrics
+      document.getElementById("annualRisk").textContent =
+        data.metrics.annual_risk;
+      document.getElementById("sharpeRatio").textContent =
+        data.metrics.sharpe_ratio;
+      document.getElementById("cagr").textContent = data.metrics.cagr;
+      document.getElementById("diversificationRatio").textContent =
+        data.metrics.diversification_ratio;
+
+      // Plot performance chart
+      Plotly.newPlot(
+        "performanceChart",
+        [
+          {
+            x: data.performance.dates,
+            y: data.performance.values,
+            type: "scatter",
+            name: "Portfolio Value",
+          },
+        ],
+        {
+          title: "Portfolio Performance",
+          xaxis: { title: "Date", color: "white" },
+          yaxis: { title: "Portfolio Value", color: "white" },
+          plot_bgcolor: "#2A2B2E",
+          paper_bgcolor: "#2A2B2E",
+          font: { color: "white" }
+        }
+      );
+
+      // Plot weights chart
+      Plotly.newPlot(
+        "weightsChart",
+        [
+          {
+            values: data.weights.weights,
+            labels: data.weights.assets,
+            type: "pie",
+            name: "Portfolio Weights",
+          },
+        ],
+        {
+          title: "Asset Allocation",
+          plot_bgcolor: "#2A2B2E",
+          paper_bgcolor: "#2A2B2E",
+          font: { color: "white" }
+        }
+      );
+
+      // Correlation matrix
+      const correlationData = [
+        {
+          z: Object.values(data.correlation).map((row) => Object.values(row)),
+          x: Object.keys(data.correlation),
+          y: Object.keys(data.correlation),
+          type: "heatmap",
+          colorscale: "RdBu",
+          colorbar: {
+            title: "Correlation",
+            titlefont: { color: "white" },
+            tickfont: { color: "white" }
+          },
+        },
+      ];
+
+      // Add annotations for cell values
+      const annotations = [];
+      const zData = Object.values(data.correlation).map((row) => Object.values(row));
+      const xLabels = Object.keys(data.correlation);
+      const yLabels = Object.keys(data.correlation);
+
+      for (let i = 0; i < zData.length; i++) {
+        for (let j = 0; j < zData[i].length; j++) {
+          annotations.push({
+            x: xLabels[j],
+            y: yLabels[i],
+            text: zData[i][j].toFixed(2), // Round to 2 decimal places
+            font: {
+              color: zData[i][j] > 0.5 || zData[i][j] < -0.5 ? "white" : "black",
+            },
+            showarrow: false,
+          });
+        }
+      }
+
+      // Configure correlation matrix layout
+      const layout = {
+        title: "Correlation Matrix",
+        annotations: annotations,
+        xaxis: {
+          title: "Stocks",
+          side: "bottom",
+          color: "white"
+        },
+        yaxis: {
+          title: "Stocks",
+          autorange: "reversed", // Keep the order consistent with the heatmap
+          color: "white"
+        },
+        plot_bgcolor: "#2A2B2E",
+        paper_bgcolor: "#2A2B2E",
+        font: { color: "white" }
+      };
+
+      Plotly.newPlot("correlationMatrix", correlationData, layout);
+
+      if (data.wealth_plot_data) {
+        createWealthIndexPlot(data.wealth_plot_data);
+      }
 
             // Show results
             resultsSection.classList.remove("hidden");

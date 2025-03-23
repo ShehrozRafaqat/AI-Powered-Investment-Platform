@@ -2,13 +2,18 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import joblib
-from datetime import datetime
+from datetime import datetime, timedelta
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.metrics import classification_report
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+import math
+import os
+from keras.models import Sequential, load_model
+from keras.layers import Dense, LSTM, Dropout
+import matplotlib.pyplot as plt
 
 import os
 
@@ -203,6 +208,98 @@ def lstm_predict(ticker, model_path):
     
     return actual_prices, y_pred.flatten(), scaler
 
+def tsla_lstm_predict(ticker, model_path):
+    # Load the trained LSTM model
+    model = tf.keras.models.load_model(model_path)
+    if model is None:
+        return None, None, None
+
+    # Fetch the latest 200 days of stock data
+    stock_data = yf.download(ticker, period="200d", interval="1d")
+    
+    if stock_data.empty:
+        print(f"Error: No data found for {ticker}.")
+        return None, None, None
+    
+    # Extract closing prices
+    close_prices = stock_data['Close'].values.reshape(-1, 1)
+
+    # Initialize and fit the scaler
+    scaler = joblib.load('scaler.save')  
+    scaled_close = scaler.transform(close_prices)
+
+    # Create sequences for prediction
+    x_test, y_test = [], []
+    time_steps = 100  # Last 100 days as input
+    
+    # We need to leave at least 7 days at the end for prediction targets
+    for i in range(time_steps, len(scaled_close) - 7):
+        x_test.append(scaled_close[i-time_steps:i, 0])  # Past 100 days
+        y_test.append(scaled_close[i:i+7, 0])  # Next 7 days
+    
+    x_test, y_test = np.array(x_test), np.array(y_test)
+    
+    # Reshape X to be [samples, time steps, features]
+    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
+    
+    # Make predictions
+    y_pred = model.predict(x_test)
+    
+    # Reshape predictions and actual values for inverse scaling
+    # Need to ensure the shapes match the original data shape
+    y_pred_reshaped = y_pred.reshape(y_pred.shape[0], y_pred.shape[1])
+    y_test_reshaped = y_test.reshape(y_test.shape[0], y_test.shape[1])
+    
+    # Inverse transform to get actual stock prices
+    y_pred_actual = scaler.inverse_transform(y_pred_reshaped)
+    y_test_actual = scaler.inverse_transform(y_test_reshaped)
+    
+    # To match the expected format in your code, we'll return the first day's prediction
+    # and the corresponding actual price (you can modify this if needed)
+    predicted_prices = y_pred_actual[:, 0]  # First day of each prediction
+    actual_prices = y_test_actual[:, 0]  # First day of each actual
+    
+    return predicted_prices, actual_prices, scaler
+
+def predict_next_7_days_tsla(ticker, model_path):
+    SEQ_LENGTH = 60  # Must match training
+    
+    model = tf.keras.models.load_model(model_path)
+    scaler = joblib.load('scaler.save')
+    
+    # Get minimum required data
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=SEQ_LENGTH + 60)  # 30-day buffer
+    stock_data = yf.download(ticker, start=start_date, end=end_date)
+    
+    # Validate data length
+    if len(stock_data) < SEQ_LENGTH:
+        print(f"Need at least {SEQ_LENGTH} days of data")
+        return None, None
+    
+    # Preprocess
+    close_prices = stock_data['Close'].values.reshape(-1, 1)
+    scaled_data = scaler.transform(close_prices)
+    
+    # Create proper input sequence
+    input_sequence = scaled_data[-SEQ_LENGTH:].reshape(1, SEQ_LENGTH, 1)
+    print(f"Scaled Input for Prediction:", input_sequence.flatten()[-5:])
+    print("Scaler data_min_:", scaler.data_min_)
+    print("Scaler data_max_:", scaler.data_max_) # Print last few inputs
+
+    
+    # Predict
+    prediction = model.predict(input_sequence)
+    next_7_days = scaler.inverse_transform(prediction.reshape(7, 1)).flatten()
+    
+    # Post-processing
+    latest_price = close_prices[-1][0]
+    print(f"Latest price: {latest_price:.2f}")
+    print(f"Raw predictions: {next_7_days.round(2)}")
+    
+    
+    return close_prices[-30:].flatten().tolist(), next_7_days.tolist()
+
 def calculate_lstm_metrics(actual, predicted):
 
     mae = mean_absolute_error(actual, predicted)
@@ -333,3 +430,163 @@ def lstm_predict_next_7_days(ticker, model_path):
     except Exception as e:
         print(f"Error in LSTM prediction for {ticker}: {e}")
         return None
+    
+# Function to get stock data using yfinance
+def get_stock_data(ticker, period='1y'):
+    stock_data = yf.download(ticker, period=period)
+    return stock_data
+
+# Function to create dataset with lookback days
+def create_dataset(dataset, lookback=7):
+    X, y = [], []
+    for i in range(lookback, len(dataset)):
+        X.append(dataset[i-lookback:i, 0])
+        y.append(dataset[i, 0])
+    return np.array(X), np.array(y)
+
+# Function to build and train LSTM model
+def build_lstm_model(X_train, y_train, epochs=25, batch_size=32):
+    # Initialize the model
+    model = Sequential()
+    
+    # Add LSTM layers with dropout
+    model.add(LSTM(units=50, return_sequences=True, input_shape=(X_train.shape[1], 1)))
+    model.add(Dropout(0.1))
+    
+    model.add(LSTM(units=50, return_sequences=True))
+    model.add(Dropout(0.1))
+    
+    model.add(LSTM(units=50, return_sequences=True))
+    model.add(Dropout(0.1))
+    
+    model.add(LSTM(units=50))
+    model.add(Dropout(0.1))
+    
+    # Add output layer
+    model.add(Dense(units=1))
+    
+    # Compile the model
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    
+    # Train the model
+    history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+    
+    return model, history
+
+# Function to evaluate the model
+def evaluate_model(model, X_test, y_test_actual, scaler):
+    # Make predictions
+    predictions = model.predict(X_test)
+    
+    # Inverse transform to get actual prices
+    predictions = scaler.inverse_transform(predictions)
+    
+    # Calculate RMSE
+    rmse = math.sqrt(mean_squared_error(y_test_actual, predictions))
+    
+    return predictions, rmse
+
+# Function to forecast next 7 days
+def forecast_next_7_days(model, last_sequence, scaler):
+    future_predictions = []
+    current_sequence = last_sequence.copy()
+    
+    # Predict for next 7 days
+    for _ in range(7):
+        # Reshape for prediction
+        current_sequence_reshaped = np.reshape(current_sequence, (1, current_sequence.shape[0], 1))
+        
+        # Predict next day
+        next_day_prediction = model.predict(current_sequence_reshaped)
+        
+        # Append prediction to list
+        future_predictions.append(next_day_prediction[0, 0])
+        
+        # Update sequence for next prediction (remove first element and add prediction)
+        current_sequence = np.append(current_sequence[1:], next_day_prediction[0, 0])
+    
+    # Convert predictions to original scale
+    future_predictions = np.array(future_predictions).reshape(-1, 1)
+    future_predictions = scaler.inverse_transform(future_predictions)
+    
+    return future_predictions
+
+# Main function to run the entire process
+def run_lstm_stock_prediction(ticker, lookback=7, test_size=0.2, epochs=25, batch_size=32):
+    # Get stock data
+    print(f"Downloading stock data for {ticker}...")
+    df = get_stock_data(ticker)
+    
+    # Prepare data
+    close_prices = df[['Close']].values
+    
+    # Split data into train and test sets
+    train_size = int(len(close_prices) * (1 - test_size))
+    train_data = close_prices[:train_size]
+    test_data = close_prices[train_size:]
+    
+    # Scale the data
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    train_data_scaled = scaler.fit_transform(train_data)
+    
+    # Create datasets with lookback days
+    X_train, y_train = create_dataset(train_data_scaled, lookback)
+    
+    # Reshape input for LSTM [samples, time steps, features]
+    X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
+    
+    # Build and train the model
+    print("Building and training LSTM model...")
+    model, history = build_lstm_model(X_train, y_train, epochs, batch_size)
+    
+    # Prepare test data
+    dataset_total = np.concatenate((train_data, test_data), axis=0)
+    inputs = dataset_total[len(dataset_total) - len(test_data) - lookback:]
+    inputs_scaled = scaler.transform(inputs)
+    
+    # Create test dataset
+    X_test = []
+    for i in range(lookback, len(inputs_scaled)):
+        X_test.append(inputs_scaled[i-lookback:i, 0])
+    X_test = np.array(X_test)
+    X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+    
+    # Evaluate model
+    print("Evaluating model...")
+    predictions, rmse = evaluate_model(model, X_test, test_data, scaler)
+    print(f"Actual prices: {test_data.flatten()}")
+    print(f"Predicted prices: {predictions.flatten()}")
+    
+    # Forecast next 7 days
+    print("Forecasting next 7 days...")
+    last_sequence = inputs_scaled[-lookback:].reshape(-1)
+    future_predictions = forecast_next_7_days(model, last_sequence, scaler)
+    
+    # Create dates for the next 7 days (excluding weekends)
+    last_date = df.index[-1]
+    future_dates = []
+    days_added = 0
+    current_date = last_date
+    
+    while days_added < 7:
+        current_date += timedelta(days=1)
+        if current_date.weekday() < 5:  # Monday to Friday
+            future_dates.append(current_date)
+            days_added += 1
+    
+    print("\n--- 7-Day Price Forecast ---")
+    for i, date in enumerate(future_dates):
+        print(f"{date.strftime('%Y-%m-%d')}: ${future_predictions[i][0]:.2f}")
+    
+    # Return data instead of plotting
+    return {
+        'ticker': ticker,
+        'rmse': rmse,
+        'actual_prices': test_data,
+        'predicted_prices': predictions,
+        'future_predictions': future_predictions,
+        'future_dates': future_dates,
+        'historical_dates': df.index[-30:] if len(close_prices) >= 30 else df.index,
+        'historical_prices': close_prices[-30:] if len(close_prices) >= 30 else close_prices,
+        'training_loss': history.history['loss']
+    }

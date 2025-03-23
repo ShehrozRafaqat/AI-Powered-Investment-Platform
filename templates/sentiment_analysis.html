@@ -68,6 +68,114 @@
       .body-blur {
         overflow: hidden;
       }
+      .navbar {
+        background: #444654;
+        padding: 1.5rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .brand {
+        color: white !important;
+        font-weight: 600;
+        letter-spacing: 1px;
+      }
+
+      .nav-links a {
+        color: white !important;
+        margin: 0 15px;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .nav-links a:hover {
+        color: #10A37F !important;
+        text-decoration: none;
+      }
+
+      .sentiment-analysis {
+        padding: 2rem 0;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #202123;
+        min-height: 100vh;
+        color: white;
+        line-height: 1.6;
+        margin: 0;
+      }
+      .sentiment-form {
+        background: #2A2B2E;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin: 2rem 0;
+      }
+
+      .sentiment-form label {
+        font-weight: 600;
+        color: white;
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .sentiment-form select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #3E3F42;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: white;
+        background: #3E3F42;
+      }
+
+      .table-container {
+        background: #2A2B2E;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        margin: 2rem 0;
+      }
+
+      .chart-container {
+        background: #2A2B2E;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        margin: 2rem 0;
+      }
+
+      .chart-img {
+        width: 100%;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+      }
+
+      .chart-img:hover {
+        transform: scale(1.02);
+      }
+
+      .loading-overlay {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+      }
+
+      .loading-text {
+        color: #7830de;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
     </style>
     <script>
       // Function to show loading overlay
@@ -157,12 +265,6 @@
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="container">
-        <p>&copy; 2025 Investment Platform. All rights reserved.</p>
-      </div>
-    </footer>
     {% if hide_loading %}
     <script>
       hideLoading();

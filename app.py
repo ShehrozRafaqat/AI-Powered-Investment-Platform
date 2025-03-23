@@ -4,7 +4,7 @@ import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
 from sentiment_analysis_logic import fetch_news, process_news 
-from stock_prediction import aggregate_sentiment,predict_next_7_days, prepare_data,train_model, lstm_predict, calculate_lstm_metrics, train_linear_regression_and_predict, lstm_predict_next_7_days, combine_predictions
+from stock_prediction import aggregate_sentiment,predict_next_7_days, prepare_data,train_model, lstm_predict, calculate_lstm_metrics, train_linear_regression_and_predict, lstm_predict_next_7_days, combine_predictions,tsla_lstm_predict,predict_next_7_days_tsla, run_lstm_stock_prediction
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -100,7 +100,7 @@ def chatbot():
     user_query = request.json.get('query')
 
     # Replace with your Kaggle notebook's API endpoint
-    KAGGLE_NOTEBOOK_API_URL = "https://0d71-35-194-9-32.ngrok-free.app/api"
+    KAGGLE_NOTEBOOK_API_URL = "https://381e-35-237-227-195.ngrok-free.app/api"
 
     try:
         # Send the user query to the Kaggle notebook
@@ -226,10 +226,11 @@ def predict_stock():
             if df.empty:
                 return render_template('stock_prediction.html', error="No news data found for the selected tickers.")
 
-            stock_data = prepare_data(df, tickers)
+            print("Here")
+            #stock_data = prepare_data(df, tickers)
             
-            if not stock_data:
-                return render_template('stock_prediction.html', error="Could not prepare stock data for prediction.")
+            #if not stock_data:
+                #return render_template('stock_prediction.html', error="Could not prepare stock data for prediction.")
 
             if model_type == "Logistic Regression":
                 model_results, classification_reports = train_model(stock_data)
@@ -294,63 +295,108 @@ def predict_stock():
                     model_type=model_type,
                     tickers=tickers
                 )
+            
             elif model_type == "LSTM":
-                # Depending on the selected ticker, load the respective LSTM model
-                if tick == "AAPL":
-                    actual_prices, predicted_prices, scaler = lstm_predict(tick, "LSTM_model.keras")
-                    historical_prices, next_7_days = predict_next_7_days(tick, "LSTM_model.keras")
-                elif tick == "AMZN":
-                    actual_prices, predicted_prices, scaler = lstm_predict(tick, "AMZN_LSTM_model.keras")
-                    historical_prices, next_7_days = predict_next_7_days(tick, "AMZN_LSTM_model.keras")
-
-                metrics = calculate_lstm_metrics(actual_prices, predicted_prices)
-                metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
-                metrics_table = metrics_df.to_html(classes="table table-bordered", index=False)               
-
-                if actual_prices is not None and predicted_prices is not None:
-                # Plot predictions
-                    plt.figure(figsize=(12,6))
-                    plt.plot(actual_prices, 'b', label="Actual Price")
-                    plt.plot(predicted_prices, 'r', label="Predicted Price")
-                    plt.title(f"{tick} Stock Price Prediction")
-                    plt.xlabel('Time')
-                    plt.ylabel('Price')
-                    plt.legend()
-
-                    img = io.BytesIO()
-                    plt.savefig(img, format='png')
-                    img.seek(0)
-                    plot_url = base64.b64encode(img.getvalue()).decode('utf8')
-                    plt.close()
-
-                    future_dates = [datetime.now() + timedelta(days=i) for i in range(1, 8)]
-                    next_7_days_with_dates = list(zip(future_dates, next_7_days))
+                print("TRUE")
+                # Validate ticker selection
+                valid_tickers = ["AAPL", "AMZN", "TSLA", "GOOGL", "MSFT"]  # Add any other tickers you want to support
+                
+                if tick not in valid_tickers:
+                    # Handle invalid ticker selection
+                    flash(f"Invalid ticker selection. Please choose from {', '.join(valid_tickers)}", "danger")
+                    return render_template('stock_prediction.html', error=True)
+                print(f"Selected ticker: {tick}")
+                
+                try:
+                    # Run the LSTM prediction using the updated function
+                    print("Running LSTM prediction...")
+                    results = run_lstm_stock_prediction(tick, lookback=7, epochs=25, batch_size=32)
+                    
+                    # Extract information from results
+                    rmse = results['rmse']
+                    future_predictions = results['future_predictions']
+                    future_dates = results['future_dates']
+                    actual_prices = results.get('actual_prices', None)
+                    print(f"backend: ", actual_prices.flatten())
+                    predicted_prices = results.get('predicted_prices', None)
+                    training_loss = results.get('training_loss', None)
+                    
+                    # Calculate metricss
+                    metrics = {
+                        'RMSE': rmse,
+                    }
+                    metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
+                    metrics_table = metrics_df.to_html(classes="table table-bordered", index=False)
+                    
+                    # Generate plot for actual vs. predicted prices
+                    if actual_prices is not None and predicted_prices is not None:
+                        plt.figure(figsize=(12, 6))
+                        plt.plot(actual_prices, 'b', label="Actual Price")
+                        plt.plot(predicted_prices, 'r', label="Predicted Price")
+                        plt.title(f"{tick} Stock Price Prediction")
+                        plt.xlabel('Time')
+                        plt.ylabel('Price')
+                        plt.legend()
+                        img = io.BytesIO()
+                        plt.savefig(img, format='png')
+                        img.seek(0)
+                        plot_url = base64.b64encode(img.getvalue()).decode('utf8')
+                        plt.close()
+                    else:
+                        plot_url = None
+                    
+                    # Format the future predictions for display
+                    future_dates_formatted = [date.strftime('%Y-%m-%d') for date in future_dates]
+                    next_7_days_with_dates = list(zip(future_dates_formatted, future_predictions.flatten()))
                     next_7_days_df = pd.DataFrame(next_7_days_with_dates, columns=['Date', 'Predicted Price'])
-                    next_7_days_df['Date'] = next_7_days_df['Date'].dt.strftime('%Y-%m-%d')
                     next_7_days_table = next_7_days_df.to_html(classes='table table-bordered')
-
+                    
+                    # Generate plot for next 7 days prediction
                     fig_next, ax_next = plt.subplots(figsize=(8, 6))
-                    ax_next.plot(range(1, 8), next_7_days, marker='o', color="orange", label="Predicted Prices")
+                    ax_next.plot(range(1, 8), future_predictions.flatten(), marker='o', color="orange", label="Predicted Prices")
                     ax_next.set_title(f"{tick} Next 7 Days Prediction")
                     ax_next.set_xlabel("Days (1 = Tomorrow)")
                     ax_next.set_ylabel("Price")
                     ax_next.set_xticks(range(1, 8))
                     ax_next.legend()
-
                     img_next = io.BytesIO()
                     plt.savefig(img_next, format='png')
                     img_next.seek(0)
-                    plt.close()
                     plot_next_url = base64.b64encode(img_next.getvalue()).decode('utf8')
+                    plt.close()
+                    
+                    # Generate training loss plot if available
+                    if training_loss is not None:
+                        plt.figure(figsize=(12, 6))
+                        plt.plot(training_loss, label='Training Loss')
+                        plt.title('LSTM Model Training Loss')
+                        plt.xlabel('Epoch')
+                        plt.ylabel('Loss')
+                        plt.legend()
+                        img_loss = io.BytesIO()
+                        plt.savefig(img_loss, format='png')
+                        img_loss.seek(0)
+                        plot_loss_url = base64.b64encode(img_loss.getvalue()).decode('utf8')
+                        plt.close()
+                    else:
+                        plot_loss_url = None
+                    
+                    # Return the template with all the data
+                    return render_template('stock_prediction.html',
+                                        plot_url=plot_url,
+                                        metrics_table=metrics_table,
+                                        next_7_days_table=next_7_days_table,
+                                        plot_next_url=plot_next_url,
+                                        plot_loss_url=plot_loss_url,
+                                        model_type=model_type,
+                                        ticker=tick)
+                
+                except Exception as e:
+                    # Handle any errors that occur during prediction
+                    error_message = f"An error occurred while predicting {tick} stock prices: {str(e)}"
+                    flash(error_message, "danger")
+                    return render_template('stock_prediction.html', error=True, error_message=error_message)
 
-                return render_template('stock_prediction.html',
-                                    plot_url=plot_url,
-                                    metrics_table=metrics_table,
-                                    next_7_days_table=next_7_days_table,
-                                    plot_next_url=plot_next_url,
-                                    model_type=model_type,
-                                    ticker=tick)
-            
             elif model_type == "Linear Regression":
                 if not tickers:
                     return render_template('stock_prediction.html', error="Please select at least one ticker.")
