@@ -29,8 +29,12 @@
         background-color: var(--custom-Input);
       }
       .navbar {
-        background-color: #444654;
+        background-color: #202123;
         color: white;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
       .navbar-brand {
         font-weight: bold;
@@ -44,11 +48,14 @@
         color: #10A37F; /* Purple on hover */
       }
       .submit-button {
-        background-color: #10A37F; /* Dark blue */
+        background-color: #ffffff;
+        color: #2e2e2f;
+        border: 1px solid #d9d9e3;
         transition: background-color 0.3s ease;
       }
       .submit-button:hover {
-        background-color: #0D8A6F; /* Purple */
+        background: #f7f7f8;
+        border-color: #c8c8d0;
       }
       #loadingSpinner .animate-spin {
         border-top-color: #0D8A6F; /* Top border is transparent */
@@ -72,7 +79,9 @@
   </head>
   <body class="bg-custom-dark text-white">
     <nav class="navbar py-4 px-6 flex justify-between items-center">
-      <div class="navbar-brand">Investment Platform</div>
+      <div class="navbar-brand">
+         <img src="static\images\logo.png" alt="Investment Platform Logo" class="h-12 rounded-full">
+      </div>
       <ul class="nav-links flex space-x-4">
         <li><a href="/">Dashboard</a></li>
         <li><a href="/efficient_frontier">Efficient frontier</a></li>

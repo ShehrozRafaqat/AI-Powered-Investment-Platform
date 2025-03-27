@@ -19,6 +19,7 @@ import plotly.graph_objs as go
 import types
 from itertools import chain
 import requests
+import yfinance as yf
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -297,7 +298,6 @@ def predict_stock():
                 )
             
             elif model_type == "LSTM":
-                print("TRUE")
                 # Validate ticker selection
                 valid_tickers = ["AAPL", "AMZN", "TSLA", "GOOGL", "MSFT"]  # Add any other tickers you want to support
                 
@@ -308,6 +308,10 @@ def predict_stock():
                 print(f"Selected ticker: {tick}")
                 
                 try:
+                    stock = yf.Ticker(tick)
+                    current_price = stock.history(period='1d')['Close'].iloc[-1]  # Get the latest closing price
+                    print(f"Current price of {tick}: ${current_price:.2f}")
+
                     # Run the LSTM prediction using the updated function
                     print("Running LSTM prediction...")
                     results = run_lstm_stock_prediction(tick, lookback=7, epochs=25, batch_size=32)
@@ -389,7 +393,9 @@ def predict_stock():
                                         plot_next_url=plot_next_url,
                                         plot_loss_url=plot_loss_url,
                                         model_type=model_type,
-                                        ticker=tick)
+                                        ticker=tick,
+                                        current_price=current_price
+                                        )
                 
                 except Exception as e:
                     # Handle any errors that occur during prediction

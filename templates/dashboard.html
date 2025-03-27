@@ -4,57 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Investment Chatbot</title>
+  <link rel="stylesheet" href="/static/css/Allstyles.css" />
   <style>
-    /* Global Styles */
-    body {
-      font-family: "Inter", sans-serif;
-      margin: 0;
-      background-color: #202123;
-      color: #FFFFFF;
-    }
-
-    /* Navigation Bar */
-    .navbar {
-      background: #444654;
-      padding: 1rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .navbar .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    .navbar .brand {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .navbar .nav-links {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      gap: 20px;
-    }
-
-    .navbar .nav-links a {
-      color: white;
-      text-decoration: none;
-      font-size: 16px;
-      transition: color 0.3s ease;
-    }
-
-    .navbar .nav-links a:hover {
-      color: #10A37F;
-    }
-
     /* Chatbot Section */
     .chatbot-section {
       max-width: 800px;
@@ -132,17 +83,17 @@
 
     .chat-input button {
       padding: 12px 20px;
-      background-color: #10A37F;
-      color: white;
-      border: none;
+      background-color: #ffffff;
+      color: #2e2e2f;
+      border: 1px solid #d9d9e3;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
       transition: background-color 0.3s ease;
     }
-
     .chat-input button:hover {
-      background-color: #0D8A6F;
+      background: #f7f7f8;
+      border-color: #c8c8d0;
     }
 
     /* Footer */
@@ -174,7 +125,9 @@
   <!-- Navigation Bar -->
   <nav class="navbar">
     <div class="container">
-      <h1 class="brand">Investment Chatbot</h1>
+      <h1 class="brand">
+        <img src="static\images\logo.png" alt="Investment Platform Logo" class="logo">
+      </h1>
       <ul class="nav-links">
         <li><a href="/sentiment">Analyze Sentiment</a></li>
         <li><a href="/stock-prediction">Predict Prices</a></li>

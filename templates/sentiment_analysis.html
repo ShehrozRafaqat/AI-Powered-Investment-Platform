@@ -11,87 +11,8 @@
     />
   </head>
   <body>
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="loading-container">
-        <img
-          src="/static/images/stck.gif"
-          alt="Loading..."
-          class="loading-gif"
-        />
-        <p class="loading-text">Analyzing sentiment...</p>
-      </div>
-    </div>
     <style>
-      /* Loading Animation Styles */
-      .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-      }
-
-      .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: white;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        min-width: 200px;
-      }
-
-      .loading-gif {
-        width: 120px;
-        height: 120px;
-        margin-bottom: 20px;
-        border-radius: 12px; /* Added border-radius to match container */
-        object-fit: cover; /* Ensures the GIF maintains its aspect ratio */
-      }
-
-      .loading-text {
-        color: #333;
-        font-size: 20px;
-        margin: 0;
-        font-weight: 500;
-      }
-
-      /* Add this class to body when loading */
-      .body-blur {
-        overflow: hidden;
-      }
-      .navbar {
-        background: #444654;
-        padding: 1.5rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .brand {
-        color: white !important;
-        font-weight: 600;
-        letter-spacing: 1px;
-      }
-
-      .nav-links a {
-        color: white !important;
-        margin: 0 15px;
-        font-weight: 500;
-        transition: color 0.3s ease;
-      }
-
-      .nav-links a:hover {
-        color: #10A37F !important;
-        text-decoration: none;
-      }
-
+      
       .sentiment-analysis {
         padding: 2rem 0;
       }
@@ -154,54 +75,43 @@
       .chart-img:hover {
         transform: scale(1.02);
       }
-
-      .loading-overlay {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 12px;
+      .button-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
       }
+      .spinner {
+          width: 20px;
+          height: 20px;
+          border: 3px solid transparent;
+          border-top-color: #0D8A6F;
+          border-right-color: #045a47;
+          border-bottom-color: #03382d;
+          border-left-color: #10A37F;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          display: none;
+        }
 
-      .loading-text {
-        color: #7830de;
-        animation: pulse 1.5s infinite;
-      }
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
 
-      @keyframes pulse {
-        0% {
-          opacity: 1;
+        /* Show spinner when active */
+      .spinner.show {
+          display: block;
         }
-        50% {
-          opacity: 0.6;
-        }
-        100% {
-          opacity: 1;
-        }
-      }
     </style>
     <script>
-      // Function to show loading overlay
-      function showLoading() {
-        const overlay = document.getElementById("loadingOverlay");
-        const body = document.body;
-
-        overlay.style.display = "flex";
-        body.classList.add("body-blur");
-      }
-
-      // Function to hide loading overlay
-      function hideLoading() {
-        const overlay = document.getElementById("loadingOverlay");
-        const body = document.body;
-
-        overlay.style.display = "none";
-        body.classList.remove("body-blur");
-      }
-
       // Add this to your form submit event
       document
         .querySelector(".sentiment-form")
         .addEventListener("submit", function (e) {
           e.preventDefault(); // Prevent default form submission
-          showLoading(); // Show loading overlay
+          const spinner = document.getElementById("loadingSpinner");
+          spinner.classList.add("show"); 
 
           // Submit the form
           this.submit();
@@ -210,7 +120,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
       <div class="container">
-        <h1 class="brand">Investment Platform</h1>
+        <h1 class="brand">
+          <img src="static\images\logo.png" alt="Investment Platform Logo" class="logo">
+        </h1>
         <ul class="nav-links">
           <li><a href="/">Dashboard</a></li>
           <li><a href="/logout">Log Out</a></li>
@@ -238,9 +150,13 @@
             <option value="AAPL">AAPL</option>
             <option value="TSLA">TSLA</option>
           </select>
-          <button type="submit" class="btn analyze-btn">
-            Analyze Sentiment
-          </button>
+
+          <div class="button-container">
+              <button type="submit" class="btn analyze-btn">
+                Analyze Sentiment
+              </button>
+              <div id="loadingSpinner" class="spinner hidden"></div>
+          </div>
         </form>
 
         <!-- Displaying Sentiment Data -->
@@ -287,11 +203,10 @@
           }
 
           // Show loading overlay before form submission
-          const overlay = document.getElementById("loadingOverlay");
+          const spinner = document.getElementById("loadingSpinner");
           const body = document.body;
 
-          overlay.style.display = "flex";
-          body.classList.add("body-blur");
+          spinner.classList.add("show"); 
         });
       }
     </script>

@@ -519,7 +519,7 @@ def run_lstm_stock_prediction(ticker, lookback=7, test_size=0.2, epochs=25, batc
     
     # Prepare data
     close_prices = df[['Close']].values
-    
+
     # Split data into train and test sets
     train_size = int(len(close_prices) * (1 - test_size))
     train_data = close_prices[:train_size]

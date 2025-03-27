@@ -11,12 +11,13 @@ body {
 
 /* Navbar */
 .navbar {
-  background: #444654;
+  background: #202123;
   color: #fff;
-  padding: 1rem 0;
+  padding: 0.1rem 0;
   position: sticky;
   top: 0;
   z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .navbar .container {
@@ -28,11 +29,11 @@ body {
   padding: 0 20px; /* Add space on the left and right */
 }
 
-.navbar .brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-align: center;
-  flex: 1; /* Allows centering */
+.logo {
+  width: 48px;  /* Adjust size as needed */
+  height: 48px; /* Keep it equal for a perfect circle */
+  border-radius: 50%; /* Makes the image round */
+  object-fit: cover; /* Ensures the image scales well inside the circle */
 }
 
 .navbar .nav-links {
@@ -51,7 +52,7 @@ body {
 }
 
 .navbar .nav-links a:hover {
-  color: #10A37F;
+  color: #10a37f;
 }
 
 /* Hero Section */
@@ -73,16 +74,21 @@ body {
 }
 
 .hero .btn {
-  background: #10A37F;
-  padding: 0.8rem 1.5rem;
+  background: #ffffff;
+  padding: 10px 16px;
   text-decoration: none;
-  border-radius: 5px;
+  border: 1px solid #d9d9e3;
   font-weight: bold;
-  transition: background 0.3s ease;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  color: #2e2e2f;
+  font-size: 14px;
 }
 
 .hero .btn:hover {
-  background: #0D8A6F;
+  background: #f7f7f8;
+  border-color: #c8c8d0;
 }
 
 /* Features Section */
@@ -106,26 +112,33 @@ body {
 }
 
 .feature p {
-  color: gray
+  color: gray;
 }
 
 .features .feature-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
+  padding: 0 1.5rem;
 }
 
 .features .feature {
-  background: #2A2B2E;
+  background: #2a2b2e;
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   text-align: center;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.features .feature:hover {
+  box-shadow: 0 4px 15px rgba(16, 163, 127, 0.8); /* Green glow effect */
+  transform: translateY(-5px); /* Slight lift effect */
 }
 
 .features .feature i {
   font-size: 2rem;
-  color: #10A37F;
+  color: #10a37f;
   margin-bottom: 1rem;
 }
 
@@ -140,6 +153,7 @@ body {
   color: gray;
   text-align: center;
   padding: 1rem 0;
+  font-size: 0.875rem;
 }
 .signup-section {
   background: #202123;
@@ -147,7 +161,7 @@ body {
 }
 
 .signup-box {
-  background: #2A2B2E;
+  background: #2a2b2e;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
   padding: 30px;
   max-width: 500px;
@@ -171,31 +185,32 @@ body {
   width: 100%;
   padding: 15px;
   font-size: 16px;
-  border: 1px solid #3E3F42;
+  border: 1px solid #3e3f42;
   border-radius: 8px;
-  background-color: #3E3F42;
+  background-color: #3e3f42;
   color: white;
 }
 
 .input-group input:focus {
-  border-color: #10A37F;
+  border-color: #10a37f;
   color: white;
 }
 
 .btn {
-  width: 100%;
+  width: 102%;
   padding: 15px;
   font-size: 16px;
-  background-color: #10A37F;
-  color: white;
-  border: none;
+  background-color: #ffffff;
+  color: #2e2e2f;
   border-radius: 8px;
   cursor: pointer;
   transition: 0.3s ease;
+  border: 1px solid #d9d9e3;
 }
 
 .btn:hover {
-  background-color: #0D8A6F;
+  background: #f7f7f8;
+  border-color: #c8c8d0;
 }
 
 /* Login Link */
@@ -203,7 +218,6 @@ body {
   margin-top: 20px;
   font-size: 16px;
   color: gray;
-
 }
 
 .login-link a {

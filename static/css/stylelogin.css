@@ -1,52 +1,14 @@
-/* Basic Styles for Login Page */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
+  font-family: "Inter", sans-serif;
   margin: 0;
-  padding: 0;
-}
-
-/* Navigation Bar */
-.navbar {
-  background-color: #333;
-  padding: 15px 0;
-}
-
-.navbar .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.navbar .brand {
-  color: white;
-  font-size: 24px;
-}
-
-.navbar .nav-links {
-  list-style: none;
-}
-
-.navbar .nav-links li {
-  display: inline;
-  margin-left: 20px;
-}
-
-.navbar .nav-links a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-}
-
-.navbar .nav-links a:hover {
-  text-decoration: underline;
+  background-color: #202123;
+  color: #ffffff;
 }
 
 /* Login Section */
 .login-section {
   padding: 50px 0;
-  background-color: #f9f9f9;
+  background-color: #202123;
 }
 
 .login-section .container {
@@ -57,12 +19,12 @@ body {
 
 h2 {
   font-size: 36px;
-  color: #333;
+  color: white;
   margin-bottom: 20px;
 }
 
 form {
-  background-color: #fff;
+  background-color: #2a2b2e;
   padding: 40px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -76,15 +38,16 @@ form {
   width: 100%;
   padding: 15px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #3e3f42;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #3e3f42;
   box-sizing: border-box;
+  color: white;
 }
 
 button {
-  background-color: #4caf50;
-  color: white;
+  background-color: #ffffff;
+  color: #2e2e2f;
   border: none;
   padding: 15px;
   width: 100%;
@@ -95,7 +58,8 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+    background: #f7f7f8;
+    border-color: #c8c8d0;
 }
 
 .signup-redirect {
@@ -104,18 +68,10 @@ button:hover {
 }
 
 .signup-redirect a {
-  color: #4caf50;
+  color: #3498db;
   text-decoration: none;
 }
 
 .signup-redirect a:hover {
   text-decoration: underline;
-}
-
-/* Footer */
-.footer {
-  background-color: #333;
-  color: white;
-  padding: 20px 0;
-  text-align: center;
 }

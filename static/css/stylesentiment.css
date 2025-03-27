@@ -1,55 +1,43 @@
 /* Global Container */
 
 .navbar {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 15px 0;
+  background: #202123;
+  padding: 0.001rem 0;
   position: sticky;
   top: 0;
   z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
-
 .navbar .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
-
-.navbar .brand {
-  font-size: 24px;
-  color: #333;
-  text-decoration: none;
-  font-weight: 600;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-}
-
-.nav-links {
+.navbar .nav-links {
   list-style: none;
-  display: flex;
-  gap: 30px;
   margin: 0;
   padding: 0;
-  margin-left: auto;
+  display: flex;
+  gap: 20px;
 }
 
-.nav-links li {
-  padding: 0;
-}
-
-.nav-links a {
-  color: #555;
+.navbar .nav-links a {
+  color: white;
   text-decoration: none;
   font-size: 16px;
-  font-weight: 500;
   transition: color 0.3s ease;
 }
-
-.nav-links a:hover {
-  color: #10A37F;
+.navbar .nav-links a:hover {
+  color: #10a37f;
+}
+.logo {
+  width: 48px; /* Adjust size as needed */
+  height: 48px; /* Keep it equal for a perfect circle */
+  border-radius: 50%; /* Makes the image round */
+  object-fit: cover; /* Ensures the image scales well inside the circle */
 }
 
 /* Global Container */
@@ -65,8 +53,6 @@
 }
 
 /* Sentiment Analysis Section */
-
-
 
 .sentiment-analysis h2 {
   font-size: 36px;
@@ -94,7 +80,6 @@
 
 /* Form Styling */
 
-
 .sentiment-form label {
   font-size: 18px;
   color: #333;
@@ -120,7 +105,7 @@
 
 .sentiment-form select:focus {
   outline: none;
-  border-color: #10A37F;
+  border-color: #10a37f;
   box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.1);
 }
 
@@ -131,8 +116,8 @@
 .sentiment-form button.analyze-btn {
   padding: 12px 40px;
   font-size: 18px;
-  background-color: #10A37F;
-  color: white;
+  background-color: #ffffff;
+  color: #2e2e2f;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -144,9 +129,8 @@
 }
 
 .sentiment-form button.analyze-btn:hover {
-  background-color: #0D8A6F;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #f7f7f8;
+  border-color: #c8c8d0;
 }
 
 /* Table Styling */
@@ -154,7 +138,7 @@
   width: 90%;
   max-width: 1000px;
   margin: 30px auto;
-  background-color: #2A2B2E;
+  background-color: #2a2b2e;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -177,11 +161,11 @@
 .table-container td {
   padding: 12px 15px;
   text-align: center;
-  border: 1px solid #2A2B2E;
+  border: 1px solid #2a2b2e;
 }
 
 .table-container th {
-  background-color: #10A37F;
+  background-color: #10a37f;
   color: #fff;
   font-weight: 600;
   position: sticky;
@@ -197,7 +181,7 @@
 }
 
 .table-container td {
-  background-color: #2A2B2E;
+  background-color: #2a2b2e;
 }
 
 /* Chart Styling */
@@ -206,7 +190,7 @@
   max-width: 1000px;
   margin: 30px auto;
   text-align: center;
-  background-color: #2A2B2E;
+  background-color: #2a2b2e;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);

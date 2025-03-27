@@ -17,97 +17,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   </head>
   <body>
-     <!-- Loading Animation -->
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="loading-container">
-          <img src="/static/images/stck.gif" alt="Loading..." class="loading-gif" />
-          <p class="loading-text">Processing prediction...</p>
-      </div>
-    </div>
-
     <style>
-      .loading-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(255, 255, 255, 0.8);
-          backdrop-filter: blur(5px);
-          -webkit-backdrop-filter: blur(5px);
-          display: none;
-          justify-content: center;
-          align-items: center;
-          z-index: 2000;
-      }
-
-      .loading-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          background-color: white;
-          padding: 40px;
-          border-radius: 12px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          min-width: 200px;
-      }
-
-      .loading-gif {
-          width: 120px;
-          height: 120px;
-          margin-bottom: 20px;
-          border-radius: 12px;
-          object-fit: cover;
-      }
-
-      .loading-text {
-          color: #333;
-          font-size: 20px;
-          margin: 0;
-          font-weight: 500;
-      }
-
-      .body-blur {
-          overflow: hidden;
-      }
-      body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            color: #2c3e50;
-        }
-      .navbar {
-            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-      .nav-links a {
-            color: white !important;
-            margin: 0 15px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-      .nav-links a:hover {
-            color: #7830de !important;
-            transform: translateY(-2px);
-        }
-
-      .brand {
-            color: white !important;
-            font-weight: 600;
-            letter-spacing: 1px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-      .brand i {
-          font-size: 1.8rem;
-          color: #7830de;
-      }
       .prediction-form-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: #2A2B2E;
             backdrop-filter: blur(8px);
             border: 1px solid rgba(0, 0, 0, 0.05);
             border-radius: 15px;
@@ -124,47 +36,57 @@
         }
 
       .form-control:focus {
-            box-shadow: 0 0 0 2px #4a90e2;
+            box-shadow: 0 0 0 2px #2A2B2E;
             border-color: transparent;
         }
 
       .form-control:hover {
           transform: translateY(-1px);
       }
-      .btn-primary {
-            background: linear-gradient(135deg, #7830de 0%, #21024d 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 12px 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px #985cec;
-        }
-
-      .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px #5a358d;
-        }
-
       .model-description {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-left: 4px solid #7830de;
+            background: #2A2B2E;
         }
 
+      .button-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+
+      /* Prediction Summary */
       .prediction-summary {
-            background: linear-gradient(135deg, #e9f7ef 0%, #d4edda 100%);
-            border-left: 4px solid #401281;
-        }
+          background: #2A2B2E; /* Dark background */
+          padding: 1.5rem; /* Similar to p-6 */
+          border-radius: 10px; /* Rounded corners like rounded-lg */
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin: 2rem auto; /* Center the summary and add spacing */
+          max-width: 300px;
+      }
 
-      .ticker-badge {
-            background: linear-gradient(135deg, #343a40 0%, #23272b 100%);
-        }
+      /* Prediction Value (Ticker) */
+      .prediction-value {
+        font-size: 1.5rem; /* Similar to text-2xl */
+        font-weight: bold;
+        color: #10A37F; /* Green color for emphasis */
+      }
 
-      .table-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+      /* Label (Description) */
+      .prediction-label {
+        font-size: 0.875rem; /* Similar to text-sm */
+        color: #9ca3af; /* Gray-600 in Tailwind */
+        margin-top: 0.5rem;
+      }
+
+      /* Model Type Styling */
+      .prediction-summary p {
+        font-size: 1rem;
+        color: #fff;
+        margin-top: 0.75rem;
+      }
 
       .plots-container {
             background: white;
@@ -172,27 +94,35 @@
             padding: 1rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-
-      .loading-container {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f2f5 100%);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      .spinner {
+          width: 20px;
+          height: 20px;
+          border: 3px solid transparent;
+          border-top-color: #0D8A6F;
+          border-right-color: #045a47;
+          border-bottom-color: #03382d;
+          border-left-color: #10A37F;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          display: none;
         }
 
-      .loading-text {
-            color: #7830de;
-            animation: pulse 1.5s infinite;
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
-      @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+        /* Show spinner when active */
+      .spinner.show {
+          display: block;
         }
     </style>
     
     <nav class="navbar">
       <div class="container">
-        <h1 class="brand">Investment Platform</h1>
+        <h1 class="brand">
+          <img src="static\images\logo.png" alt="Investment Platform Logo" class="logo">
+        </h1>
         <ul class="nav-links">
           <li><a href="/">Dashboard</a></li>
           <li><a href="/logout">Log Out</a></li>
@@ -217,15 +147,13 @@
         <div class="prediction-form-container">
           <form id="predictionForm" method="POST" action="{{ url_for('predict_stock') }}">
             <div class="form-group">
-              <label for="model_type">Select Prediction Model:</label>
+              <label for="model_type">Prediction Model:</label>
               <select
                 name="model_type"
                 id="model_type"
                 class="form-control"
                 required
               >
-                <option value="Logistic Regression">Logistic Regression</option>
-                <option value="Linear Regression">Linear Regression</option>
                 <option value="LSTM">LSTM</option>
               </select>
             </div>
@@ -241,27 +169,6 @@
                   <li>Evaluates performance using Root Mean Square Error (RMSE)</li>
                 </ul>
               </div>
-              
-              <div id="linearInfo" style="display: none;">
-                <p>The Linear Regression model:</p>
-                <ul>
-                  <li>Combines sentiment analysis and technical indicators</li>
-                  <li>Provides predictions for the next 7 days</li>
-                  <li>Compares performance with LSTM for better insight</li>
-                  <li>Offers a balanced approach between technical and fundamental analysis</li>
-                </ul>
-              </div>
-              
-              <div id="logisticInfo" style="display: none;">
-                <p>The Logistic Regression model:</p>
-                <ul>
-                  <li>Predicts directional movement (up/down) rather than exact prices</li>
-                  <li>Uses classification metrics to evaluate performance</li>
-                  <li>Provides probability estimates for price movements</li>
-                  <li>Ideal for trading strategies focused on market direction</li>
-                </ul>
-              </div>
-            </div>
 
             <div class="form-group">
               <label for="tickers">Select Ticker for Prediction:</label>
@@ -275,58 +182,27 @@
                 <option value="AAPL">AAPL</option>
                 <option value="GOOGL">GOOGL</option>
                 <option value="MSFT">MSFT</option>
+                <option value="META">META</option>
                 <option value="TSLA">TSLA</option>
               </select>
               <small class="form-text text-muted">For LSTM model, only one ticker can be selected at a time.</small>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-predict">
-              Predict
-            </button>
+             <div class="button-container">
+              <button type="submit" class="btn btn-primary btn-predict">
+                Predict
+              </button>
+              <div id="loadingSpinner" class="spinner hidden"></div>
+            </div>
           </form>
         </div>
 
         {% if model_type %}
         <div class="prediction-summary">
-          <h3>Prediction Results for <span class="ticker-badge">{{ ticker }}</span></h3>
-          <p>Model: <strong>{{ model_type }}</strong></p>
+          <div class="prediction-value">{{ ticker }}</div>
+          <div class="prediction-label">Current price</div>
+          <p>$ <strong>{{ "%.2f"|format(current_price) }}</strong></p>
         </div>
-        {% endif %}
-        
-        {% if model_type == "Logistic Regression" %}
-          {% if tables %}
-            {% for ticker in tickers %}
-            <div class="results-section">
-              <h3>{{ ticker }} Prediction Results</h3>
-
-              {% if plots and plots[ticker] %}
-              <div class="plots-container">
-                <div class="plot">
-                  <h4>Price Movement Prediction</h4>
-                  <img
-                    src="data:image/png;base64,{{ plots[ticker]['prediction_plot'] }}"
-                    alt="{{ ticker }} Prediction Plot"
-                    class="img-fluid"
-                  />
-                </div>
-                <div class="plot">
-                  <h4>Classification Report</h4>
-                  <img
-                    src="data:image/png;base64,{{ plots[ticker]['report_plot'] }}"
-                    alt="{{ ticker }} Classification Report"
-                    class="img-fluid"
-                  />
-                </div>
-              </div>
-              {% endif %}
-
-              <h4>Detailed Predictions</h4>
-              <div class="table-container">
-                <div class="table-responsive">{{ tables[ticker] | safe }}</div>
-              </div>
-            </div>
-            {% endfor %}
-          {% endif %}
         {% endif %}
         
         {% if model_type == "LSTM" %}
@@ -390,69 +266,6 @@
           {% endif %}
         </div>
         {% endif %}
-        
-        {% if model_type == "Linear Regression" %}
-        <div class="results-section">
-          <h3>{{ ticker }} Linear Regression Results</h3>
-          
-          {% if plot_combine_url %}
-          <div class="plots-container">
-            <div class="plot">
-              <h4>Combined Prediction (Linear Regression + LSTM)</h4>
-              <img
-                src="data:image/png;base64,{{ plot_combine_url }}"
-                alt="Combined Prediction Plot"
-                class="img-fluid"
-              />
-            </div>
-          </div>
-          {% endif %}
-          
-          {% if l_table %}
-          <h4>Final Prediction Results</h4>
-          <div class="table-container">
-            <div class="table-responsive">{{ l_table | safe }}</div>
-          </div>
-          {% endif %}
-          
-          <div class="plots-container">
-            {% if plot_lstm_url %}
-            <div class="plot">
-              <h4>LSTM Component Analysis</h4>
-              <img
-                src="data:image/png;base64,{{ plot_lstm_url }}"
-                alt="LSTM Prediction Plot"
-                class="img-fluid"
-              />
-            </div>
-            {% endif %}
-            
-            {% if plot_linear_url %}
-            <div class="plot">
-              <h4>Linear Regression Component Analysis</h4>
-              <img
-                src="data:image/png;base64,{{ plot_linear_url }}"
-                alt="Linear Prediction Plot"
-                class="img-fluid"
-              />
-            </div>
-            {% endif %}
-          </div>
-          
-          {% if plot_lstm_v_combine_url %}
-          <div class="plots-container">
-            <div class="plot">
-              <h4>Model Comparison: Combined vs LSTM</h4>
-              <img
-                src="data:image/png;base64,{{ plot_lstm_v_combine_url }}"
-                alt="Model Comparison Plot"
-                class="img-fluid"
-              />
-            </div>
-          </div>
-          {% endif %}
-        </div>
-        {% endif %}
       </div>
     </section>
     <script>
@@ -487,40 +300,13 @@
         const tickerSelect = document.getElementById("tickers");
         const modelDescription = document.getElementById("modelDescription");
         const lstmInfo = document.getElementById("lstmInfo");
-        const linearInfo = document.getElementById("linearInfo");
-        const logisticInfo = document.getElementById("logisticInfo");
         
         // Show appropriate model description when model type changes
         modelSelect.addEventListener("change", function() {
             modelDescription.style.display = "block";
-            
-            // Hide all model info sections first
-            lstmInfo.style.display = "none";
-            linearInfo.style.display = "none";
-            logisticInfo.style.display = "none";
-            
-            // Show the appropriate section based on selection
-            if (modelSelect.value === "LSTM") {
-                lstmInfo.style.display = "block";
-                // Update ticker select for LSTM (single select)
-                tickerSelect.removeAttribute("multiple");
-            } 
-            else if (modelSelect.value === "Linear Regression") {
-                linearInfo.style.display = "block";
-                // Update ticker select for Linear Regression (can be multiple)
-                tickerSelect.setAttribute("multiple", "");
-            }
-            else if (modelSelect.value === "Logistic Regression") {
-                logisticInfo.style.display = "block";
-                // Update ticker select for Logistic Regression (can be multiple)
-                tickerSelect.setAttribute("multiple", "");
-            }
+             lstmInfo.style.display = "block";
         });
-        
-        // Initialize model description based on current selection
-        if (modelSelect.value) {
-            modelSelect.dispatchEvent(new Event('change'));
-        }
+        modelSelect.dispatchEvent(new Event("change"));
         
         if (form) {
             console.log('Form found');
@@ -546,7 +332,8 @@
                 }
                 
                 // If validation passes, show loading overlay
-                showLoading();
+                const spinner = document.getElementById("loadingSpinner");
+                spinner.classList.add("show"); // Show the spinner when form is submitted
                 
                 // Let the form submit normally
                 return true;
