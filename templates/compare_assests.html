@@ -10,9 +10,31 @@
     />
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
+      :root {
+        --custom-dark: #202123;
+        --custom-lightDark: #2a2b2e;
+        --custom-Input: #3e3f42;
+      }
+
+      .bg-custom-dark {
+        background-color: var(--custom-dark);
+      }
+      .text-custom-dark {
+        color: var(--custom-dark);
+      }
+      .bg-custom-lightDark {
+        background-color: var(--custom-lightDark);
+      }
+      .bg-custom-Input {
+        background-color: var(--custom-Input);
+      }
       .navbar {
-        background-color: #182e6f;
+        background-color: #202123;
         color: white;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
       .navbar-brand {
         font-weight: bold;
@@ -23,54 +45,54 @@
         transition: color 0.3s ease;
       }
       .nav-links a:hover {
-        color: #d946ef;
+        color: #10a37f;
       }
       .submit-button {
-        background-color: #081334;
+        background-color: #ffffff;
+        color: #2e2e2f;
+        border: 1px solid #d9d9e3;
         transition: background-color 0.3s ease;
       }
       .submit-button:hover {
-        background-color: #7830de;
+        background: #f7f7f8;
+        border-color: #c8c8d0;
       }
-      .hidden {
-        display: none;
-      }
-
-      .spinner-border {
-        display: inline-block;
-        width: 2rem;
-        height: 2rem;
-        vertical-align: text-bottom;
-        border: 0.25em solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spinner-border 0.75s linear infinite;
-      }
-
-      @keyframes spinner-border {
-        to {
-          transform: rotate(360deg);
-        }
+      #loadingSpinner .animate-spin {
+        border-top-color: #0d8a6f;
+        border-right-color: #045a47;
+        border-bottom-color: #03382d;
+        border-left-color: #10a37f;
+        border-width: 3px;
       }
       .graph-container {
         width: 100%;
         margin: 0 auto;
       }
       .footer {
-        background-color: #f3f4f6; /* Light gray background */
+        background-color: #444654;
         padding: 2rem;
-        border-top: 1px solid #e5e7eb;
-        margin-top: 2rem;
+        border-top: 1px solid #444654;
+        border-radius: 10px;
+        max-width: 78rem;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 2rem;
       }
       .footer p {
         font-size: 0.9rem;
-        color: #4b5563; /* Gray text */
+        color: #f3f4f6;
       }
     </style>
   </head>
-  <body class="bg-gray-100">
+  <body class="bg-custom-dark text-white">
     <nav class="navbar py-4 px-6 flex justify-between items-center">
-      <div class="navbar-brand">Investment Platform</div>
+      <div class="navbar-brand">
+        <img
+          src="static\images\logo.png"
+          alt="Investment Platform Logo"
+          class="h-12 rounded-full"
+        />
+      </div>
       <ul class="nav-links flex space-x-4">
         <li><a href="/">Dashboard</a></li>
         <li><a href="/logout">Log Out</a></li>
@@ -79,26 +101,26 @@
 
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold mb-8 text-center">Compare Assets</h1>
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div class="bg-custom-lightDark rounded-lg shadow-md p-6 mb-8">
         <form id="compareAssetsForm" class="space-y-4">
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2"
+            <label class="block text-white text-sm font-bold mb-2"
               >Tickers (comma-separated)</label
             >
             <input
               type="text"
               id="tickers"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input shadow rounded w-full py-2 px-3"
               placeholder="AAPL.US, TSLA.US"
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2"
+            <label class="block text-white text-sm font-bold mb-2"
               >Currency</label
             >
             <select
               id="currency"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input shadow rounded w-full py-2 px-3"
             >
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
@@ -108,10 +130,13 @@
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2"
+            <label class="block text-white text-sm font-bold mb-2"
               >Metric</label
             >
-            <select id="metric" class="shadow border rounded w-full py-2 px-3">
+            <select
+              id="metric"
+              class="bg-custom-Input shadow rounded w-full py-2 px-3"
+            >
               <option value="returns">Returns</option>
               <option value="volatility">Volatility</option>
               <option value="sharpe_ratio">Sharpe Ratio</option>
@@ -125,18 +150,18 @@
             >
               Compare
             </button>
+            <div id="loadingSpinner" class="hidden">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2"></div>
+            </div>
           </div>
         </form>
-        <div id="loadingSpinner" class="text-center mt-4 hidden">
-          <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <p>Calculating comparison data...</p>
-        </div>
       </div>
 
       <!-- Results -->
-      <div id="results" class="hidden bg-white rounded-lg shadow-md p-4">
+      <div
+        id="results"
+        class="hidden bg-custom-lightDark rounded-lg shadow-md p-4"
+      >
         <div class="graph-container">
           <div id="comparisonChart"></div>
         </div>
@@ -279,25 +304,31 @@
             }
 
             const layout = {
-              title: title,
+              title: {
+                text: title,
+                font: { color: "white" },
+              },
               xaxis: {
                 title: "Date",
                 rangeslider: {}, // Add a range slider for time period selection
                 type: "date",
+                color: "white",
               },
               yaxis: {
                 title: yaxisTitle,
                 hoverformat: ".2f",
+                color: "white",
               },
               showlegend: true,
               legend: {
                 x: 1,
                 xanchor: "right",
                 y: 1,
+                font: { color: "white" },
               },
               hovermode: "x unified", // Show all values for a given date on hover
-              plot_bgcolor: "white",
-              paper_bgcolor: "white",
+              plot_bgcolor: "#2A2B2E",
+              paper_bgcolor: "#2A2B2E",
               grid: { rows: 1, columns: 1, pattern: "independent" },
               margin: { l: 50, r: 50, t: 50, b: 50 },
             };

@@ -9,10 +9,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   </head>
   <body>
     <style>
-      
       .sentiment-analysis {
         padding: 2rem 0;
       }
@@ -25,7 +25,7 @@
         margin: 0;
       }
       .sentiment-form {
-        background: #2A2B2E;
+        background: #2a2b2e;
         border-radius: 15px;
         padding: 2rem;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -42,16 +42,16 @@
       .sentiment-form select {
         width: 100%;
         padding: 12px;
-        border: 2px solid #3E3F42;
+        border: 2px solid #3e3f42;
         border-radius: 8px;
         margin-bottom: 15px;
         font-size: 16px;
         color: white;
-        background: #3E3F42;
+        background: #3e3f42;
       }
 
       .table-container {
-        background: #2A2B2E;
+        background: #2a2b2e;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         padding: 1rem;
@@ -59,7 +59,7 @@
       }
 
       .chart-container {
-        background: #2A2B2E;
+        background: #2a2b2e;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         padding: 1rem;
@@ -82,27 +82,31 @@
         margin-top: 1rem;
       }
       .spinner {
-          width: 20px;
-          height: 20px;
-          border: 3px solid transparent;
-          border-top-color: #0D8A6F;
-          border-right-color: #045a47;
-          border-bottom-color: #03382d;
-          border-left-color: #10A37F;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          display: none;
-        }
+        width: 20px;
+        height: 20px;
+        border: 3px solid transparent;
+        border-top-color: #0d8a6f;
+        border-right-color: #045a47;
+        border-bottom-color: #03382d;
+        border-left-color: #10a37f;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: none;
+      }
 
       @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
         }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-        /* Show spinner when active */
+      /* Show spinner when active */
       .spinner.show {
-          display: block;
-        }
+        display: block;
+      }
     </style>
     <script>
       // Add this to your form submit event
@@ -111,7 +115,7 @@
         .addEventListener("submit", function (e) {
           e.preventDefault(); // Prevent default form submission
           const spinner = document.getElementById("loadingSpinner");
-          spinner.classList.add("show"); 
+          spinner.classList.add("show");
 
           // Submit the form
           this.submit();
@@ -121,7 +125,11 @@
     <nav class="navbar">
       <div class="container">
         <h1 class="brand">
-          <img src="static\images\logo.png" alt="Investment Platform Logo" class="logo">
+          <img
+            src="static\images\logo.png"
+            alt="Investment Platform Logo"
+            class="logo"
+          />
         </h1>
         <ul class="nav-links">
           <li><a href="/">Dashboard</a></li>
@@ -140,24 +148,266 @@
         </p>
 
         <!-- Form to select tickers -->
+        <!-- Form to select tickers with predictive search -->
         <form method="POST" action="/sentiment" class="sentiment-form">
-          <label for="tickers">Choose tickers:</label>
-          <select name="tickers" id="tickers" multiple>
-            <option value="AMZN">AMZN</option>
-            <option value="AMD">AMD</option>
-            <option value="FB">FB</option>
-            <option value="GOOGL">GOOGL</option>
-            <option value="AAPL">AAPL</option>
-            <option value="TSLA">TSLA</option>
-          </select>
+          <div class="ticker-selection-container">
+            <label for="ticker-search">Search and select stock tickers:</label>
+            <div class="ticker-search-box">
+              <input
+                type="text"
+                id="ticker-search"
+                placeholder="Type to search tickers..."
+                autocomplete="off"
+              />
+              <div id="search-results" class="search-results-dropdown"></div>
+            </div>
+
+            <div
+              id="selected-tickers-container"
+              class="selected-tickers-container"
+            >
+              <!-- Selected tickers will appear here as tags -->
+            </div>
+
+            <!-- Hidden input that will hold the actual values to be submitted -->
+            <div id="hidden-inputs-container"></div>
+          </div>
 
           <div class="button-container">
-              <button type="submit" class="btn analyze-btn">
-                Analyze Sentiment
-              </button>
-              <div id="loadingSpinner" class="spinner hidden"></div>
+            <button type="submit" class="btn analyze-btn">
+              Analyze Sentiment
+            </button>
+            <div id="loadingSpinner" class="spinner hidden"></div>
           </div>
         </form>
+
+        <style>
+          .ticker-selection-container {
+            margin-bottom: 20px;
+          }
+
+          .ticker-search-box {
+            position: relative;
+            margin-bottom: 10px;
+          }
+
+          #ticker-search {
+            width: 98%;
+            padding: 12px;
+            border: 1px solid #3e3f42;
+            color: white;
+            background-color: #3e3f42;
+            border-radius: 4px;
+          }
+
+          .search-results-dropdown {
+            display: none;
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #3e3f42;
+            border-top: none;
+            border-radius: 10px;
+            background-color: #3e3f42;
+            z-index: 1000;
+          }
+
+          .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+          }
+
+          .search-result-item:hover {
+            background-color: #10a37f;
+          }
+
+          .selected-tickers-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            min-height: 36px;
+            padding: 10px;
+            border: 1px dashed;
+            border-radius: 4px;
+            border-color: #3e3f42;
+          }
+
+          .ticker-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e6f2ff;
+            border: 1px solid #7ff8da;
+            color: #10a37f;
+            border-radius: 16px;
+            padding: 4px 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 14px;
+          }
+
+          .remove-ticker {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: #10a37f;
+          }
+
+          .remove-ticker:hover {
+            color: #ff3333;
+          }
+        </style>
+
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("ticker-search");
+            const searchResults = document.getElementById("search-results");
+            const selectedTickersContainer = document.getElementById(
+              "selected-tickers-container"
+            );
+            const hiddenInputsContainer = document.getElementById(
+              "hidden-inputs-container"
+            );
+            const form = document.querySelector(".sentiment-form");
+
+            // Store selected tickers
+            const selectedTickers = new Set();
+
+            // Debounce function to limit API calls
+            function debounce(func, wait) {
+              let timeout;
+              return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+              };
+            }
+
+            // Search for tickers from the API
+            const searchTickers = debounce(function (query) {
+              if (query.length < 1) {
+                searchResults.style.display = "none";
+                return;
+              }
+
+              fetch(`/api/tickers?q=${encodeURIComponent(query)}`)
+                .then((response) => response.json())
+                .then((data) => {
+                  searchResults.innerHTML = "";
+
+                  if (data.length === 0) {
+                    searchResults.innerHTML =
+                      '<div class="search-result-item">No results found</div>';
+                  } else {
+                    data.forEach((ticker) => {
+                      // Don't show already selected tickers
+                      if (!selectedTickers.has(ticker)) {
+                        const item = document.createElement("div");
+                        item.className = "search-result-item";
+                        item.textContent = ticker;
+                        item.addEventListener("click", () => {
+                          addTicker(ticker);
+                          searchInput.value = "";
+                          searchResults.style.display = "none";
+                        });
+                        searchResults.appendChild(item);
+                      }
+                    });
+                  }
+
+                  searchResults.style.display = "block";
+                })
+                .catch((error) => {
+                  console.error("Error fetching tickers:", error);
+                });
+            }, 300);
+
+            // Add a ticker to the selected list
+            function addTicker(ticker) {
+              if (selectedTickers.has(ticker)) return;
+
+              selectedTickers.add(ticker);
+
+              // Create ticker tag element
+              const tickerTag = document.createElement("div");
+              tickerTag.className = "ticker-tag";
+              tickerTag.innerHTML = `${ticker} <span class="remove-ticker" data-ticker="${ticker}">×</span>`;
+              selectedTickersContainer.appendChild(tickerTag);
+
+              // Add hidden input for form submission
+              const hiddenInput = document.createElement("input");
+              hiddenInput.type = "hidden";
+              hiddenInput.name = "tickers";
+              hiddenInput.value = ticker;
+              hiddenInput.id = `ticker-input-${ticker}`;
+              hiddenInputsContainer.appendChild(hiddenInput);
+
+              // Add event listener to remove button
+              tickerTag
+                .querySelector(".remove-ticker")
+                .addEventListener("click", function () {
+                  removeTicker(ticker);
+                });
+            }
+
+            // Remove a ticker from the selected list
+            function removeTicker(ticker) {
+              selectedTickers.delete(ticker);
+
+              // Remove ticker tag
+              const tickerTags =
+                selectedTickersContainer.querySelectorAll(".ticker-tag");
+              tickerTags.forEach((tag) => {
+                if (tag.textContent.includes(ticker)) {
+                  tag.remove();
+                }
+              });
+
+              // Remove hidden input
+              const hiddenInput = document.getElementById(
+                `ticker-input-${ticker}`
+              );
+              if (hiddenInput) {
+                hiddenInput.remove();
+              }
+            }
+
+            // Event listeners
+            searchInput.addEventListener("input", function () {
+              searchTickers(this.value.trim());
+            });
+
+            searchInput.addEventListener("focus", function () {
+              if (this.value.trim().length > 0) {
+                searchTickers(this.value.trim());
+              }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener("click", function (e) {
+              if (
+                !searchInput.contains(e.target) &&
+                !searchResults.contains(e.target)
+              ) {
+                searchResults.style.display = "none";
+              }
+            });
+
+            // Handle form submission
+            form.addEventListener("submit", function (e) {
+              if (selectedTickers.size === 0) {
+                e.preventDefault();
+                alert("Please select at least one ticker to analyze.");
+                return;
+              }
+
+              // Show loading spinner
+              const spinner = document.getElementById("loadingSpinner");
+              spinner.classList.add("show");
+            });
+          });
+        </script>
 
         <!-- Displaying Sentiment Data -->
         {% if table %}
@@ -168,47 +418,157 @@
         {% endif %}
 
         <!-- Displaying the Sentiment Chart -->
-        {% if plot_url %}
-        <h3>Sentiment Analysis Chart</h3>
-        <div class="chart-container">
-          <img
-            src="data:image/png;base64,{{ plot_url }}"
-            alt="Sentiment Analysis Chart"
-            class="chart-img"
-          />
+        {% if chart_data %}
+        <h3 class="text-center text-2xl font-bold mt-8 mb-4 text-white">
+          Sentiment Analysis Dashboard
+        </h3>
+        <div class="chart-container p-4 bg-[#2A2B2E] rounded-lg shadow-md mb-8">
+          <div id="sentimentChart" style="width: 100%; height: 500px"></div>
         </div>
+
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            const chartData = {{ chart_data | tojson | safe }};
+
+            const colorPalette = [
+              '#10A37F', '#FFA15A', '#636EFA', '#EF553B', '#00CC96',
+              "#705D56", "#6C5B7B", "#8E7C93", "#495867", "#544E61"
+            ];
+
+            const traces = [];
+            const tickers = Object.keys(chartData);
+
+            tickers.forEach((ticker, index) => {
+              traces.push({
+                x: chartData[ticker].dates,
+                y: chartData[ticker].scores,
+                name: ticker,
+                type: "bar",
+                marker: {
+                  color: colorPalette[index % colorPalette.length],
+                  opacity: 0.9,
+                  line: { width: 1.5, color: "#fff" }
+                },
+                hovertemplate: `<b>%{x}</b><br>${ticker}: %{y:.3f}<extra></extra>`
+              });
+            });
+
+            const layout = {
+              title: {
+                text: "Stock Sentiment Analysis Over Time",
+                font: { family: "Arial, sans-serif", size: 24, color: "#ffffff" },
+                x: 0.5
+              },
+              plot_bgcolor: "#2A2B2E",
+              paper_bgcolor: "#2A2B2E",
+              font: { family: "Arial, sans-serif", color: "#ffffff" },
+              xaxis: {
+                title: { text: "Date", font: { size: 16, color: "#ffffff" } },
+                tickangle: -45,
+                tickfont: { size: 12, color: "#ffffff" },
+                gridcolor: "#444654",
+                linecolor: "#ffffff",
+                showgrid: true
+              },
+              yaxis: {
+                title: { text: "Compound Sentiment Score", font: { size: 16, color: "#ffffff" } },
+                tickfont: { size: 12, color: "#ffffff" },
+                gridcolor: "#444654",
+                linecolor: "#ffffff",
+                showgrid: true,
+                zeroline: true,
+                zerolinecolor: "#ffffff",
+                zerolinewidth: 1.5,
+                range: [-1, 1]
+              },
+              barmode: "group",
+              bargap: 0.15,
+              bargroupgap: 0.1,
+              legend: {
+                orientation: "h",
+                xanchor: "center",
+                y: -0.2,
+                x: 0.5,
+                bgcolor: "rgba(255, 255, 255, 0.1)",
+                bordercolor: "#ffffff",
+                borderwidth: 1,
+                font: { size: 12, color: "#ffffff" }
+              },
+              margin: { l: 70, r: 40, b: 100, t: 80, pad: 10 },
+              shapes: [
+                {
+                  type: 'line', x0: 0, y0: 0.05, x1: 1, y1: 0.05, xref: 'paper',
+                  line: { color: '#00FF00', width: 1, dash: 'dot' }
+                },
+                {
+                  type: 'line', x0: 0, y0: -0.05, x1: 1, y1: -0.05, xref: 'paper',
+                  line: { color: '#FF0000', width: 1, dash: 'dot' }
+                }
+              ],
+              annotations: [
+                {
+                  x: 1, y: 0.05, xref: 'paper', text: 'Positive',
+                  showarrow: false, font: { size: 10, color: '#00FF00' },
+                  xanchor: 'right', yanchor: 'bottom'
+                },
+                {
+                  x: 1, y: -0.05, xref: 'paper', text: 'Negative',
+                  showarrow: false, font: { size: 10, color: '#FF0000' },
+                  xanchor: 'right', yanchor: 'top'
+                }
+              ]
+            };
+
+            const config = {
+              responsive: true,
+              displayModeBar: true,
+              modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+              modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+              displaylogo: false,
+              toImageButtonOptions: {
+                format: 'png',
+                filename: 'sentiment_analysis',
+                height: 700,
+                width: 1200,
+                scale: 2
+              }
+            };
+
+            Plotly.newPlot("sentimentChart", traces, layout, config);
+
+            const myPlot = document.getElementById('sentimentChart');
+
+            myPlot.on('plotly_click', function(data) {
+              const curveNumber = data.points[0].curveNumber;
+              const newTraces = [...traces];
+
+              newTraces.forEach((trace, i) => {
+                trace.marker.opacity = i === curveNumber ? 1 : 0.4;
+              });
+
+              Plotly.react("sentimentChart", newTraces, layout, config);
+            });
+
+            myPlot.on('plotly_doubleclick', function() {
+              const newTraces = [...traces];
+              newTraces.forEach(trace => { trace.marker.opacity = 0.9; });
+
+              Plotly.react("sentimentChart", newTraces, layout, config);
+            });
+
+            const legendContainer = document.getElementById('legend-container');
+            tickers.forEach((ticker, index) => {
+              const legendItem = document.createElement('div');
+              legendItem.className = 'flex items-center mr-6 mb-2';
+              legendItem.innerHTML = `
+                <div style="width: 16px; height: 16px; background-color: ${colorPalette[index % colorPalette.length]}; margin-right: 6px;"></div>
+                <span class="text-sm font-medium text-white">${ticker}</span>
+              `;
+            });
+          });
+        </script>
         {% endif %}
       </div>
     </section>
-
-    {% if hide_loading %}
-    <script>
-      hideLoading();
-    </script>
-    {% endif %}
-    <script>
-      // Remove any existing event listeners
-      const form = document.querySelector(".sentiment-form");
-      if (form) {
-        form.removeEventListener("submit", function () {});
-
-        form.addEventListener("submit", function (e) {
-          const selectedTickers =
-            document.getElementById("tickers").selectedOptions;
-
-          if (selectedTickers.length === 0) {
-            e.preventDefault();
-            alert("Please select at least one ticker to analyze.");
-            return;
-          }
-
-          // Show loading overlay before form submission
-          const spinner = document.getElementById("loadingSpinner");
-          const body = document.body;
-
-          spinner.classList.add("show"); 
-        });
-      }
-    </script>
   </body>
 </html>

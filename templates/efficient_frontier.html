@@ -10,10 +10,31 @@
     />
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
-      /* Custom styles */
+      :root {
+        --custom-dark: #202123;
+        --custom-lightDark: #2a2b2e;
+        --custom-Input: #3e3f42;
+      }
+
+      .bg-custom-dark {
+        background-color: var(--custom-dark);
+      }
+      .text-custom-dark {
+        color: var(--custom-dark);
+      }
+      .bg-custom-lightDark {
+        background-color: var(--custom-lightDark);
+      }
+      .bg-custom-Input {
+        background-color: var(--custom-Input);
+      }
       .navbar {
-        background-color: #182e6f;
+        background-color: #202123;
         color: white;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
       .navbar-brand {
         font-weight: bold;
@@ -24,42 +45,55 @@
         transition: color 0.3s ease;
       }
       .nav-links a:hover {
-        color: #d946ef; /* Purple on hover */
+        color: #10a37f;
       }
       .submit-button {
-        background-color: #081334; /* Dark blue */
+        background-color: #ffffff;
+        color: #2e2e2f;
+        border: 1px solid #d9d9e3;
         transition: background-color 0.3s ease;
       }
       .submit-button:hover {
-        background-color: #7830de; /* Purple */
+        background: #f7f7f8;
+        border-color: #c8c8d0;
       }
       #loadingSpinner .animate-spin {
-        border-top-color: #934ef3; /* Top border is transparent */
-        border-right-color: #290b53; /* Right border is transparent */
-        border-bottom-color: #5212ac; /* Bottom border is transparent */
-        border-left-color: #7830de; /* Left border uses the desired color */
-        border-width: 3px; /* Adjust thickness if needed */
+        border-top-color: #0d8a6f;
+        border-right-color: #045a47;
+        border-bottom-color: #03382d;
+        border-left-color: #10a37f;
+        border-width: 3px;
       }
       .graph-container {
-        width: 100%; /* Full width */
+        width: 100%;
         margin: 0 auto;
       }
       .footer {
-        background-color: #f3f4f6; /* Light gray background */
+        background-color: #444654;
         padding: 2rem;
-        border-top: 1px solid #e5e7eb;
-        margin-top: 2rem;
+        border-top: 1px solid #444654;
+        border-radius: 10px;
+        max-width: 78rem;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 2rem;
       }
       .footer p {
         font-size: 0.9rem;
-        color: #4b5563; /* Gray text */
+        color: #f3f4f6;
       }
     </style>
   </head>
-  <body class="bg-gray-100">
+  <body class="bg-custom-dark text-white">
     <!-- Navbar -->
     <nav class="navbar py-4 px-6 flex justify-between items-center">
-      <div class="navbar-brand">Investment Platform</div>
+      <div class="navbar-brand">
+        <img
+          src="static\images\logo.png"
+          alt="Investment Platform Logo"
+          class="h-12 rounded-full"
+        />
+      </div>
       <ul class="nav-links flex space-x-4">
         <li><a href="/">Dashboard</a></li>
         <li><a href="/logout">Log Out</a></li>
@@ -68,31 +102,29 @@
 
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-8 text-center">
-        Efficient Frontier Analysis
-      </h1>
+      <h1 class="text-3xl font-bold mb-8">Efficient Frontier Analysis</h1>
 
       <!-- Input Form -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div class="bg-custom-lightDark rounded-lg shadow-md p-6 mb-8">
         <form id="efficientFrontierForm" class="space-y-4">
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">
-              Tickers (comma-separated, with .US suffix)
+            <label class="block text-white text-sm font-bold mb-2">
+              Tickers (comma-separated)
             </label>
             <input
               type="text"
               id="tickers"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input shadow rounded w-full py-2 px-3"
               placeholder="AAPL.US, TSLA.US"
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">
+            <label class="block text-white text-sm font-bold mb-2">
               Currency
             </label>
             <select
               id="currency"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input shadow rounded w-full py-2 px-3"
             >
               <option value="USD" selected>USD</option>
               <option value="EUR">EUR</option>
@@ -100,13 +132,13 @@
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">
+            <label class="block text-white text-sm font-bold mb-2">
               Risk-Free Rate (%)
             </label>
             <input
               type="number"
               id="rfReturn"
-              class="shadow border rounded w-full py-2 px-3"
+              class="bg-custom-Input shadow rounded w-full py-2 px-3"
               placeholder="5"
               value="5"
               step="0.01"
@@ -137,8 +169,8 @@
 
       <!-- Results Section -->
       <div id="results" class="hidden">
-        <div class="bg-white rounded-lg shadow-md p-4">
-          <div class="graph-container">
+        <div class="bg-custom-lightDark rounded-lg shadow-md p-4">
+          <div class="bg-custom-lightDark graph-container">
             <div id="efficientFrontierChart"></div>
           </div>
           <div class="graph-container mt-8">
@@ -234,7 +266,7 @@
               mode: "lines",
               type: "scatter",
               name: "Efficient Frontier",
-              line: { color: "black", dash: "dash", width: 3 },
+              line: { color: "gold", dash: "dash", width: 3 },
               hovertemplate: "Risk: %{x:.2f}<br>Return: %{y:.2f}%",
             };
 
@@ -268,7 +300,8 @@
               name: asset.ticker,
               text: [asset.ticker],
               textposition: "top center",
-              marker: { color: "orange", size: 10 },
+              textfont: { color: "white", size: 12 },
+              marker: { color: "red", size: 10 },
               hovertemplate: `${asset.ticker}<br>Risk: %{x:.2f}<br>Return: %{y:.2f}%`,
               showlegend: false, // Hide individual stock entries from the legend
             }));
@@ -278,12 +311,18 @@
 
             // Layout configuration
             const layout = {
-              title:
-                "Efficient Frontier with Assets and Monte Carlo Simulation",
-              xaxis: { title: "Risk (Standard Deviation)" },
-              yaxis: { title: "Expected Return (CAGR)", tickformat: ".2%" },
-              plot_bgcolor: "white",
-              paper_bgcolor: "white",
+              title: {
+                text: "Efficient Frontier with Assets and Monte Carlo Simulation",
+                font: { color: "white" }, // Set title color to white
+              },
+              xaxis: { title: "Risk (Standard Deviation)", color: "white" },
+              yaxis: {
+                title: "Expected Return (CAGR)",
+                tickformat: ".2%",
+                color: "white",
+              },
+              plot_bgcolor: "#2A2B2E",
+              paper_bgcolor: "#2A2B2E",
               hovermode: "closest",
               legend: {
                 orientation: "h",
@@ -291,6 +330,7 @@
                 y: 1.02,
                 xanchor: "right",
                 x: 1,
+                font: { color: "white" },
               },
               responsive: true, // Ensure responsiveness
             };
@@ -329,12 +369,18 @@
 
             // Layout configuration for Transition Maps
             const transitionMapLayout = {
-              title: "Transition Map",
-              xaxis: { title: "Risk (Standard Deviation)" },
-              yaxis: { title: "Weights", range: [0, 1] }, // Weights should range from 0 to 1
-              plot_bgcolor: "white",
-              paper_bgcolor: "white",
+              title: {
+                text: "Transition Map",
+                font: { color: "white" }, // Set title color to white
+              },
+              xaxis: { title: "Risk (Standard Deviation)", color: "white" },
+              yaxis: { title: "Weights", range: [0, 1], color: "white" }, // Weights should range from 0 to 1
+              plot_bgcolor: "#2A2B2E",
+              paper_bgcolor: "#2A2B2E",
               hovermode: "closest",
+              legend: {
+                font: { color: "white" },
+              },
             };
 
             // Render the Transition Map for Risk

@@ -19,6 +19,8 @@ import plotly.graph_objs as go
 import types
 from itertools import chain
 import requests
+import threading
+import time
 import yfinance as yf
 
 app = Flask(__name__)
@@ -26,6 +28,47 @@ app.secret_key = 'your_secret_key'
 bcrypt = Bcrypt(app)
 
 DATABASE = 'investment_platform.db'
+nasdaq_tickers = []
+
+def fetch_nasdaq_tickers():
+    print("Fetching NASDAQ tickers...")
+    global nasdaq_tickers
+    try:
+        url = "http://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
+        response = requests.get(url)
+        lines = response.text.strip().split('\r\n')
+        tickers = []
+        for line in lines[1:-1]:  # Skip header and footer
+            if not line.strip():
+                continue
+            parts = line.split('|')
+            ticker = parts[0].strip().upper()
+            # Optional: Filter out symbols with $ or other criteria
+            if '$' not in ticker:
+                tickers.append(ticker)
+        nasdaq_tickers = tickers
+        print(f"Fetched {nasdaq_tickers[1]} NASDAQ tickers")
+    except Exception as e:
+        print(f"Error fetching NASDAQ tickers: {e}")
+
+# Initial fetch on app start
+fetch_nasdaq_tickers()
+
+# Periodically refresh every 24 hours
+def periodic_fetch():
+    while True:
+        time.sleep(24 * 60 * 60)
+        fetch_nasdaq_tickers()
+
+thread = threading.Thread(target=periodic_fetch)
+thread.daemon = True
+thread.start()
+
+@app.route('/api/tickers')
+def get_tickers():
+    search_term = request.args.get('q', '').upper()
+    filtered = [ticker for ticker in nasdaq_tickers if search_term in ticker]
+    return jsonify(filtered[:100])  # Limit results for performance
 
 # Database connection function
 def get_db_connection():
@@ -168,44 +211,36 @@ def profile():
 def sentiment_analysis():
     if request.method == 'POST':
         tickers = request.form.getlist('tickers')
-        
         if not tickers:
-            return render_template('sentiment_analysis.html', 
-                                 hide_loading=True,
-                                 error='Please select at least one ticker to analyze.')
+            return render_template('sentiment_analysis.html', hide_loading=True, 
+                                  error='Please select at least one ticker to analyze.')
         
         try:
-            # Your existing analysis code
+            # Fetch news data for the selected tickers
             news_tables = fetch_news(tickers)
+            
+            # Process news data and perform sentiment analysis
             df = process_news(news_tables)
             
-            # Your plotting code
-            mean_df = df.groupby(['ticker', 'date'])['compound'].mean().unstack()
-            mean_df = mean_df.transpose()
+            # Prepare data for Plotly
+            chart_data = {}
+            grouped = df.groupby('ticker')
             
-            fig, ax = plt.subplots(figsize=(10, 8))
-            mean_df.plot(kind='bar', stacked=False, ax=ax)
-            ax.set_title('Average Sentiment Scores by Date and Ticker')
-            ax.set_ylabel('Compound Sentiment Score')
-            ax.set_xlabel('Date')
-            ax.legend(title='Ticker')
+            for ticker, group in grouped:
+                chart_data[ticker] = {
+                    'dates': group['date'].dt.strftime('%Y-%m-%d').tolist(),
+                    'scores': group['compound'].tolist()
+                }
             
-            img = io.BytesIO()
-            plt.tight_layout()
-            plt.savefig(img, format='png')
-            img.seek(0)
-            plot_url = base64.b64encode(img.getvalue()).decode('utf8')
-            
-            return render_template('sentiment_analysis.html',
-                                 table=df.to_html(classes='table table-bordered table-striped'),
-                                 plot_url=plot_url,
-                                 hide_loading=True)
-                                 
+            return render_template('sentiment_analysis.html', 
+                                  table=df.to_html(classes='table table-bordered table-striped'),
+                                  chart_data=chart_data,
+                                  hide_loading=True)
+                                  
         except Exception as e:
-            # Handle any errors and ensure loading overlay is hidden
-            return render_template('sentiment_analysis.html',
-                                 hide_loading=True,
-                                 error=f'An error occurred during analysis: {str(e)}')
+            return render_template('sentiment_analysis.html', 
+                                  hide_loading=True, 
+                                  error=f'An error occurred during analysis: {str(e)}')
     
     return render_template('sentiment_analysis.html')
 
@@ -299,7 +334,7 @@ def predict_stock():
             
             elif model_type == "LSTM":
                 # Validate ticker selection
-                valid_tickers = ["AAPL", "AMZN", "TSLA", "GOOGL", "MSFT"]  # Add any other tickers you want to support
+                valid_tickers = request.form['tickers'].upper() # Add any other tickers you want to support
                 
                 if tick not in valid_tickers:
                     # Handle invalid ticker selection

@@ -170,29 +170,77 @@
                 </ul>
               </div>
 
-            <div class="form-group">
-              <label for="tickers">Select Ticker for Prediction:</label>
-              <select
-                name="tickers"
-                id="tickers"
-                class="form-control"
-                required
-              >
-                <option value="AMZN">AMZN</option>
-                <option value="AAPL">AAPL</option>
-                <option value="GOOGL">GOOGL</option>
-                <option value="MSFT">MSFT</option>
-                <option value="META">META</option>
-                <option value="TSLA">TSLA</option>
-              </select>
-              <small class="form-text text-muted">For LSTM model, only one ticker can be selected at a time.</small>
-            </div>
+              <div class="form-group">
+                  <label for="tickers" style="color: white;">Enter Ticker:</label>
+                  <input type="text" id="tickers" name="tickers" class="form-control" autocomplete="off" placeholder="AMZN" required style="background-color: #3E3F42; color: white; border-color: #3E3F42; padding: 12px">
+                  <small class="form-text text-muted">For LSTM model, only one ticker can be selected at a time.</small>
+              </div>
+              <!-- jQuery and jQuery UI -->
+              <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+              <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+              <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+              <style>
+                  /* Custom styling for autocomplete dropdown */
+                  .ui-autocomplete {
+                      background-color: #3E3F42;
+                      color: white;
+                      border: 1px solid #3E3F42;
+                      border-radius: 10px;
+                      max-height: 200px;
+                      overflow-y: auto;
+                      overflow-x: hidden;
+                  }
+                  
+                  .ui-menu-item {
+                      padding: 8px 12px;
+                      font-family: inherit;
+                      font-size: 14px;
+                  }
+                  
+                  .ui-menu-item:hover, 
+                  .ui-menu-item.ui-state-focus, 
+                  .ui-menu-item.ui-state-active {
+                      background-color: #4E4F52;
+                      color: white;
+                      border: none;
+                      margin: 0;
+                  }
+                  
+                  /* Placeholder styling */
+                  #tickers::placeholder {
+                      color: #a0a0a0;
+                      opacity: 1;
+                  }
+                  
+                  /* Focus state for input */
+                  #tickers:focus {
+                      border-color: #10A37F;
+                      box-shadow: 0 0 0 0.2rem rgba(16, 163, 127, 0.25);
+                  }
+              </style>
+              <script>
+                $(function() {
+                    $("#tickers").autocomplete({
+                        source: function(request, response) {
+                            $.ajax({
+                                url: "/api/tickers",
+                                data: { q: request.term },
+                                success: function(data) {
+                                    response(data);
+                                }
+                            });
+                        },
+                        minLength: 1,
+                        delay: 300
+                    });
+                });
+                </script>
 
              <div class="button-container">
               <button type="submit" class="btn btn-primary btn-predict">
                 Predict
               </button>
-              <div id="loadingSpinner" class="spinner hidden"></div>
+              <div id="loadingSpinner" class="spinner"></div>
             </div>
           </form>
         </div>
@@ -269,27 +317,6 @@
       </div>
     </section>
     <script>
-    // Loading overlay functions
-    function showLoading() {
-        console.log('Showing loading overlay');
-        const overlay = document.getElementById("loadingOverlay");
-        const body = document.body;
-        if (overlay) {
-            overlay.style.display = "flex";
-            body.classList.add("body-blur");
-        }
-    }
-
-    function hideLoading() {
-        console.log('Hiding loading overlay');
-        const overlay = document.getElementById("loadingOverlay");
-        const body = document.body;
-        if (overlay) {
-            overlay.style.display = "none";
-            body.classList.remove("body-blur");
-        }
-    }
-
     // Wait for the document to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM Content Loaded');
@@ -313,29 +340,34 @@
             
             form.addEventListener('submit', function(e) {
                 console.log('Form submitted');
-                
-                // Get selected tickers
-                const selectedTickers = tickerSelect.selectedOptions;
-                
-                // Validate ticker selection
-                if (selectedTickers.length === 0) {
-                    e.preventDefault();
-                    alert('Please select at least one ticker to predict.');
-                    return false;
-                }
-                
-                // LSTM model can only handle one ticker at a time
-                if (modelSelect.value === "LSTM" && selectedTickers.length > 1) {
-                    e.preventDefault();
-                    alert('LSTM model can only process one ticker at a time. Please select only one ticker.');
-                    return false;
-                }
-                
-                // If validation passes, show loading overlay
+
                 const spinner = document.getElementById("loadingSpinner");
-                spinner.classList.add("show"); // Show the spinner when form is submitted
+                spinner.classList.add("show");
                 
-                // Let the form submit normally
+                // Modern validation for the autocomplete input
+                const tickerValue = tickerSelect.value.trim().toUpperCase();
+                
+                // Basic validation
+                if (!tickerValue) {
+                    e.preventDefault();
+                    spinner.classList.remove("show");
+                    alert('Please select a valid ticker');
+                    return false;
+                }
+                
+                // LSTM validation
+                if (modelSelect.value === "LSTM" && tickerValue.includes(',')) {
+                    e.preventDefault();
+                    spinner.classList.remove("show");
+                    alert('LSTM model can only process one ticker at a time.');
+                    return false;
+                }
+                
+                // For better UX, keep spinner visible during redirect
+                window.addEventListener('beforeunload', function() {
+                    spinner.classList.add("show");
+                });
+                
                 return true;
             });
         } else {
@@ -344,10 +376,10 @@
     });
     </script>
     {% if tables or plots or plot_url or l_table or metrics_table or plot_next_url or plot_loss_url %}
-    <script
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Results detected, hiding loading overlay');
-        hideLoading();
+        document.getElementById('loadingSpinner').classList.remove('show');
     });
     </script>
     {% endif %}
