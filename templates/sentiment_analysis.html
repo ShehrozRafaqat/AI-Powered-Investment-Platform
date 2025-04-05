@@ -427,145 +427,208 @@
         </div>
 
         <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            const chartData = {{ chart_data | tojson | safe }};
+                  document.addEventListener("DOMContentLoaded", function () {
+          const chartData = {{ chart_data | tojson | safe }};
 
-            const colorPalette = [
-              '#10A37F', '#FFA15A', '#636EFA', '#EF553B', '#00CC96',
-              "#705D56", "#6C5B7B", "#8E7C93", "#495867", "#544E61"
-            ];
+          const colorPalette = [
+            '#10A37F', '#FFA15A', '#636EFA', '#EF553B', '#00CC96',
+            "#705D56", "#6C5B7B", "#8E7C93", "#495867", "#544E61"
+          ];
 
-            const traces = [];
-            const tickers = Object.keys(chartData);
+          // Process data - combine dates for clearer visualization
+          const processedData = {};
+          const tickers = Object.keys(chartData);
 
-            tickers.forEach((ticker, index) => {
-              traces.push({
-                x: chartData[ticker].dates,
-                y: chartData[ticker].scores,
-                name: ticker,
-                type: "bar",
-                marker: {
-                  color: colorPalette[index % colorPalette.length],
-                  opacity: 0.9,
-                  line: { width: 1.5, color: "#fff" }
-                },
-                hovertemplate: `<b>%{x}</b><br>${ticker}: %{y:.3f}<extra></extra>`
-              });
-            });
-
-            const layout = {
-              title: {
-                text: "Stock Sentiment Analysis Over Time",
-                font: { family: "Arial, sans-serif", size: 24, color: "#ffffff" },
-                x: 0.5
-              },
-              plot_bgcolor: "#2A2B2E",
-              paper_bgcolor: "#2A2B2E",
-              font: { family: "Arial, sans-serif", color: "#ffffff" },
-              xaxis: {
-                title: { text: "Date", font: { size: 16, color: "#ffffff" } },
-                tickangle: -45,
-                tickfont: { size: 12, color: "#ffffff" },
-                gridcolor: "#444654",
-                linecolor: "#ffffff",
-                showgrid: true
-              },
-              yaxis: {
-                title: { text: "Compound Sentiment Score", font: { size: 16, color: "#ffffff" } },
-                tickfont: { size: 12, color: "#ffffff" },
-                gridcolor: "#444654",
-                linecolor: "#ffffff",
-                showgrid: true,
-                zeroline: true,
-                zerolinecolor: "#ffffff",
-                zerolinewidth: 1.5,
-                range: [-1, 1]
-              },
-              barmode: "group",
-              bargap: 0.15,
-              bargroupgap: 0.1,
-              legend: {
-                orientation: "h",
-                xanchor: "center",
-                y: -0.2,
-                x: 0.5,
-                bgcolor: "rgba(255, 255, 255, 0.1)",
-                bordercolor: "#ffffff",
-                borderwidth: 1,
-                font: { size: 12, color: "#ffffff" }
-              },
-              margin: { l: 70, r: 40, b: 100, t: 80, pad: 10 },
-              shapes: [
-                {
-                  type: 'line', x0: 0, y0: 0.05, x1: 1, y1: 0.05, xref: 'paper',
-                  line: { color: '#00FF00', width: 1, dash: 'dot' }
-                },
-                {
-                  type: 'line', x0: 0, y0: -0.05, x1: 1, y1: -0.05, xref: 'paper',
-                  line: { color: '#FF0000', width: 1, dash: 'dot' }
-                }
-              ],
-              annotations: [
-                {
-                  x: 1, y: 0.05, xref: 'paper', text: 'Positive',
-                  showarrow: false, font: { size: 10, color: '#00FF00' },
-                  xanchor: 'right', yanchor: 'bottom'
-                },
-                {
-                  x: 1, y: -0.05, xref: 'paper', text: 'Negative',
-                  showarrow: false, font: { size: 10, color: '#FF0000' },
-                  xanchor: 'right', yanchor: 'top'
-                }
-              ]
-            };
-
-            const config = {
-              responsive: true,
-              displayModeBar: true,
-              modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
-              modeBarButtonsToRemove: ['lasso2d', 'select2d'],
-              displaylogo: false,
-              toImageButtonOptions: {
-                format: 'png',
-                filename: 'sentiment_analysis',
-                height: 700,
-                width: 1200,
-                scale: 2
+          tickers.forEach(ticker => {
+            // Group scores by date (averaging multiple entries per day)
+            const dailyScores = {};
+            for (let i = 0; i < chartData[ticker].dates.length; i++) {
+              const date = chartData[ticker].dates[i];
+              if (!dailyScores[date]) {
+                dailyScores[date] = { sum: 0, count: 0 };
               }
+              dailyScores[date].sum += chartData[ticker].scores[i];
+              dailyScores[date].count += 1;
+            }
+
+            // Create averaged data arrays
+            const uniqueDates = Object.keys(dailyScores).sort();
+            const averagedScores = uniqueDates.map(date => {
+              return dailyScores[date].sum / dailyScores[date].count;
+            });
+
+            processedData[ticker] = {
+              dates: uniqueDates,
+              scores: averagedScores
             };
+          });
 
-            Plotly.newPlot("sentimentChart", traces, layout, config);
-
-            const myPlot = document.getElementById('sentimentChart');
-
-            myPlot.on('plotly_click', function(data) {
-              const curveNumber = data.points[0].curveNumber;
-              const newTraces = [...traces];
-
-              newTraces.forEach((trace, i) => {
-                trace.marker.opacity = i === curveNumber ? 1 : 0.4;
-              });
-
-              Plotly.react("sentimentChart", newTraces, layout, config);
-            });
-
-            myPlot.on('plotly_doubleclick', function() {
-              const newTraces = [...traces];
-              newTraces.forEach(trace => { trace.marker.opacity = 0.9; });
-
-              Plotly.react("sentimentChart", newTraces, layout, config);
-            });
-
-            const legendContainer = document.getElementById('legend-container');
-            tickers.forEach((ticker, index) => {
-              const legendItem = document.createElement('div');
-              legendItem.className = 'flex items-center mr-6 mb-2';
-              legendItem.innerHTML = `
-                <div style="width: 16px; height: 16px; background-color: ${colorPalette[index % colorPalette.length]}; margin-right: 6px;"></div>
-                <span class="text-sm font-medium text-white">${ticker}</span>
-              `;
+          // Create bar traces
+          const barTraces = [];
+          tickers.forEach((ticker, index) => {
+            barTraces.push({
+              x: processedData[ticker].dates,
+              y: processedData[ticker].scores,
+              name: ticker,
+              type: "bar",
+              marker: {
+                color: colorPalette[index % colorPalette.length],
+                opacity: 0.8,
+                line: { width: 1, color: "#fff" }
+              },
+              text: processedData[ticker].scores.map(score => score.toFixed(2)),
+              textposition: 'outside',
+              textfont: {
+                size: 10,
+                color: '#ffffff'
+              },
+              hovertemplate: `<b>%{x}</b><br>${ticker}: %{y:.3f}<extra></extra>`
             });
           });
+
+          // Add line traces for clearer trend visualization
+          const lineTraces = [];
+          tickers.forEach((ticker, index) => {
+            lineTraces.push({
+              x: processedData[ticker].dates,
+              y: processedData[ticker].scores,
+              name: ticker + " (trend)",
+              type: "scatter",
+              mode: "lines",
+              line: {
+                color: colorPalette[index % colorPalette.length],
+                width: 2,
+                dash: 'solid'
+              },
+              hoverinfo: 'skip',
+              showlegend: false
+            });
+          });
+
+          // Combine traces - uncomment if you want both bars and lines
+          // const traces = [...barTraces, ...lineTraces];
+
+          // Or use just bars with clear labels
+          const traces = barTraces;
+
+          const layout = {
+            title: {
+              text: "Stock Sentiment Analysis Over Time",
+              font: { family: "Arial, sans-serif", size: 24, color: "#ffffff" },
+              x: 0.5
+            },
+            plot_bgcolor: "#2A2B2E",
+            paper_bgcolor: "#2A2B2E",
+            font: { family: "Arial, sans-serif", color: "#ffffff" },
+            xaxis: {
+              title: { text: "Date", font: { size: 16, color: "#ffffff" } },
+              tickangle: -45,
+              tickfont: { size: 12, color: "#ffffff" },
+              gridcolor: "#444654",
+              linecolor: "#ffffff",
+              showgrid: true
+            },
+            yaxis: {
+              title: { text: "Compound Sentiment Score", font: { size: 16, color: "#ffffff" } },
+              tickfont: { size: 12, color: "#ffffff" },
+              gridcolor: "#444654",
+              linecolor: "#ffffff",
+              showgrid: true,
+              zeroline: true,
+              zerolinecolor: "#ffffff",
+              zerolinewidth: 1.5,
+              range: [-1, 1],
+              dtick: 0.2,  // Add gridlines every 0.2 units for better reference
+            },
+            barmode: "group",
+            bargap: 0.2,   // Slightly increased for better separation
+            bargroupgap: 0.1,
+            legend: {
+              orientation: "h",
+              xanchor: "center",
+              y: -0.2,
+              x: 0.5,
+              bgcolor: "rgba(255, 255, 255, 0.1)",
+              bordercolor: "#ffffff",
+              borderwidth: 1,
+              font: { size: 12, color: "#ffffff" }
+            },
+            margin: { l: 70, r: 40, b: 100, t: 80, pad: 10 },
+            shapes: [
+              {
+                type: 'line', x0: 0, y0: 0.05, x1: 1, y1: 0.05, xref: 'paper',
+                line: { color: '#00FF00', width: 1, dash: 'dot' }
+              },
+              {
+                type: 'line', x0: 0, y0: -0.05, x1: 1, y1: -0.05, xref: 'paper',
+                line: { color: '#FF0000', width: 1, dash: 'dot' }
+              }
+            ],
+            annotations: [
+              {
+                x: 1, y: 0.05, xref: 'paper', text: 'Positive',
+                showarrow: false, font: { size: 10, color: '#00FF00' },
+                xanchor: 'right', yanchor: 'bottom'
+              },
+              {
+                x: 1, y: -0.05, xref: 'paper', text: 'Negative',
+                showarrow: false, font: { size: 10, color: '#FF0000' },
+                xanchor: 'right', yanchor: 'top'
+              }
+            ]
+          };
+
+          const config = {
+            responsive: true,
+            displayModeBar: true,
+            modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+            modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+            displaylogo: false,
+            toImageButtonOptions: {
+              format: 'png',
+              filename: 'sentiment_analysis',
+              height: 700,
+              width: 1200,
+              scale: 2
+            }
+          };
+
+          Plotly.newPlot("sentimentChart", traces, layout, config);
+
+          const myPlot = document.getElementById('sentimentChart');
+
+          myPlot.on('plotly_click', function(data) {
+            const curveNumber = data.points[0].curveNumber;
+            const newTraces = [...traces];
+
+            newTraces.forEach((trace, i) => {
+              trace.marker = trace.marker || {};
+              trace.marker.opacity = i === curveNumber ? 1 : 0.3;
+            });
+
+            Plotly.react("sentimentChart", newTraces, layout, config);
+          });
+
+          myPlot.on('plotly_doubleclick', function() {
+            const newTraces = [...traces];
+            newTraces.forEach(trace => {
+              trace.marker = trace.marker || {};
+              trace.marker.opacity = 0.8;
+            });
+
+            Plotly.react("sentimentChart", newTraces, layout, config);
+          });
+
+                    const legendContainer = document.getElementById('legend-container');
+                    tickers.forEach((ticker, index) => {
+                      const legendItem = document.createElement('div');
+                      legendItem.className = 'flex items-center mr-6 mb-2';
+                      legendItem.innerHTML = `
+                        <div style="width: 16px; height: 16px; background-color: ${colorPalette[index % colorPalette.length]}; margin-right: 6px;"></div>
+                        <span class="text-sm font-medium text-white">${ticker}</span>
+                      `;
+                    });
+                  });
         </script>
         {% endif %}
       </div>

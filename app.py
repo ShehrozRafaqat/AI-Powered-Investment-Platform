@@ -231,6 +231,8 @@ def sentiment_analysis():
                     'dates': group['date'].dt.strftime('%Y-%m-%d').tolist(),
                     'scores': group['compound'].tolist()
                 }
+
+                print(f"Ticker: {ticker}, Dates: {chart_data[ticker]['dates']}, Scores: {chart_data[ticker]['scores']}")
             
             return render_template('sentiment_analysis.html', 
                                   table=df.to_html(classes='table table-bordered table-striped'),
@@ -923,5 +925,5 @@ def compare_assets():
         return jsonify({'error': str(e)}), 400
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=False)
